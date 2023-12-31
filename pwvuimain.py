@@ -3,7 +3,7 @@ import sys
 
 from pwvdoc    import PWVDoc
 from pwvdoc    import PWVKey
-from pwvuiapp    import PWVApp
+from pwvuiapp  import PWVApp
 from pwvuicard import PWVCard
 from pwvuidocview import PWVDocView
 
@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import QFormLayout
 from PyQt6.QtWidgets import QFrame
 from PyQt6.QtWidgets import QGroupBox
 from PyQt6.QtWidgets import QHBoxLayout
+from PyQt6.QtWidgets import QInputDialog
 from PyQt6.QtWidgets import QLabel
 from PyQt6.QtWidgets import QLineEdit
 from PyQt6.QtWidgets import QMainWindow
@@ -137,7 +138,9 @@ class PWVMainWin(QMainWindow):
         if fname:
             print(f"FNAME: {fname}")
             print(f"FSET: {fset}")
-            self._mainDoc.saveDocAs(fname)
+            actWin = QApplication.instance().findActive()
+            if actWin:
+                actWin.docView().pwvDoc().saveDocAs(fname)
                
     def fileMenuSaveCB(self):
         print("fileMenuSaveCB")
@@ -159,6 +162,16 @@ class PWVMainWin(QMainWindow):
         docView.saveFile(docPath)
         docView.pwvDoc().setModified(False)
         docView.updateTitle()
+
+    def queryPassword(self):
+        text, ok = QInputDialog.getText(self, "Vault Password",
+                                        "Password:",
+                                        QLineEdit.EchoMode.Password)
+# default input
+#                                        QtCore.QDir.home().dirName())
+        if ok and text:
+            return text
+        return None
 
     def _addEntryCB(self):
         self._entryAdded = True
@@ -231,14 +244,32 @@ class PWVMainWin(QMainWindow):
 
         saveAsAct = QAction("Save As...", self)
         saveAsAct.setShortcuts(QKeySequence.StandardKey.SaveAs)
-        saveAsAct.setStatusTip("Save curren vault as...")
+        saveAsAct.setStatusTip("Save current vault as...")
         saveAsAct.triggered.connect(self.fileMenuSaveAsCB)
         fileMenu.addAction(saveAsAct)
 
         #        fileMenu.addSeparator()
 #        fileMenu.addAction(self.exitAct)
 
+        self._encodeMenu = self.menuBar().addMenu("Ecoding")
+        
+        self._decodeVaultAct = QAction("Decode Vault...", self)
+        self._decodeVaultAct.setStatusTip("Decode current vault...")
+        self._decodeVaultAct.triggered.connect(self._decodeVaultCB)
+        self._encodeMenu.addAction(self._decodeVaultAct)
+
+        self._encodeVaultAct = QAction("Encode Vault...", self)
+        self._encodeVaultAct.setStatusTip("Encode current vault...")
+        self._encodeVaultAct.triggered.connect(self._encodeVaultCB)
+        self._encodeMenu.addAction(self._encodeVaultAct)
+
         self._winMenu = self.menuBar().addMenu("Windows")
+
+    def _decodeVaultCB(self):
+        self.docView().decryptDoc()
+
+    def _encodeVaultCB(self):
+        self.docView().encryptDoc()
 
     def _winMenuCB(self, docView):
         print(f"_winMenuCB {docView}")
