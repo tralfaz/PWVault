@@ -65,17 +65,7 @@ class PWVMainWin(QMainWindow):
 
     def addDocView(self, docView):
         self._docWins.append(docView)
-
-        self._winMenu.clear()
-        for dvx, docView in enumerate(self._docWins):
-            actName = docView.pwvDoc().fileName()
-            if not actName:
-                actName = "<New Vault>"
-            winAct = QAction(actName, self)
-            winAct.setShortcut(QKeySequence(f"Ctrl+{dvx}"))
-            winAct.setStatusTip(f"Make window {actName} active")
-            winAct.triggered.connect(partial(self._winMenuCB, docView))
-            self._winMenu.addAction(winAct)
+        self.updateWindowsMenu()
 
     def docView(self):
         return self._docView
@@ -112,20 +102,21 @@ class PWVMainWin(QMainWindow):
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
         dialog.setNameFilter("PWVDoc (*.pwv *.pwvx)")
         dialog.setViewMode(QFileDialog.ViewMode.Detail)
-#        fname, fset = dialog.getOpenFileName(self, caption=dlgcap)
-#        if fname:
-#            print(f"FNAME: {fname}")
-#            print(f"FSET: {fset}")
         if dialog.exec():
             fnames = dialog.selectedFiles()
             print(f"FNAMES: {repr(fnames)}")
-            pwvDoc = PWVDoc()
-            pwvDoc.openDoc(fnames[0])
-            print(f"{pwvDoc.entries()}")
-            docView = PWVDocView(pwvDoc)
-            docView.setVisible(True)
-            self._docWins.append(docView)
-
+            actWin = QApplication.instance().findActive()
+            if not not actWin.docView().pwvDoc().encoded and \
+               not actWin.docView().pwvDoc().entries():
+                actWin.docView().openFile(fnames[0])
+            else:
+                pwvDoc = PWVDoc()
+                pwvDoc.openDoc(fnames[0])
+                docView = PWVDocView(pwvDoc)
+                docView.setVisible(True)
+                self._docWins.append(docView)
+            self.updateWindowsMenu()
+                
     def fileMenuSaveAsCB(self):
         print("fileMenuSaveAsCB")
 #       __init__(parent: QWidget = None, caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = '')
@@ -172,6 +163,18 @@ class PWVMainWin(QMainWindow):
         if ok and text:
             return text
         return None
+
+    def updateWindowsMenu(self):
+        self._winMenu.clear()
+        for dvx, docView in enumerate(self._docWins):
+            actName = docView.pwvDoc().fileName()
+            if not actName:
+                actName = "<New Vault>"
+            winAct = QAction(actName, self)
+            winAct.setShortcut(QKeySequence(f"Ctrl+{dvx}"))
+            winAct.setStatusTip(f"Make window {actName} active")
+            winAct.triggered.connect(partial(self._winMenuCB, docView))
+            self._winMenu.addAction(winAct)
 
     def _addEntryCB(self):
         self._entryAdded = True
@@ -266,10 +269,12 @@ class PWVMainWin(QMainWindow):
         self._winMenu = self.menuBar().addMenu("Windows")
 
     def _decodeVaultCB(self):
-        self.docView().decryptDoc()
+        actWin = QApplication.instance().findActive()
+        actWin.docView().decryptDoc()
 
     def _encodeVaultCB(self):
-        self.docView().encryptDoc()
+        actWin = QApplication.instance().findActive()
+        actWin.docView().encryptDoc()
 
     def _winMenuCB(self, docView):
         print(f"_winMenuCB {docView}")
