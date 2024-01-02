@@ -4,6 +4,7 @@ import sys
 from pwvdoc import PWVKey
 from pwvuiapp import PWVApp
 
+from PyQt6 import QtCore
 from PyQt6 import QtGui
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtWidgets import QFrame
@@ -251,7 +252,49 @@ class PWVCard(QFrame):
           }
           """)
     
+
+class PWVEncodedCard(QFrame):
+    """The single DocView card displayed when showing an encoeded doc."""
+
+    def __init__(self):
+        super().__init__()
+
+        icon = PWVApp.instance().asset("padlock-icon")
+        pixmap = icon.pixmap(icon.availableSizes()[0])
+        lockLBL = QLabel()
+        lockLBL.setPixmap(pixmap)
         
+        self._copyBTN = QPushButton()
+
+        lbl = QLabel("<H1>ENCODED</H1>")
+        lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
+
+        btn = QPushButton("Decode")
+        btn.clicked.connect(self._decodeCB)
+        
+        vbox = QVBoxLayout()
+        vbox.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        vbox.addWidget(lockLBL)
+        vbox.addWidget(lbl)
+        vbox.addWidget(btn)
+        self.setLayout(vbox)
+
+        self._setStyle()
+        
+    def _decodeCB(self):
+        print("PWVEncodedCard._decodeCB")
+        mainWin = QApplication.instance().mainWin()
+        mainWin.decodeVault()
+
+    def _setStyle(self):
+        self.setStyleSheet("""
+            PWVEncodedCard {
+              background-color: black;
+              border: 2px solid red;
+              border-radius: 0px;
+            }""")
+
+
 class PWVWindow(QWidget):
     def __init__(self, val):
         super().__init__()

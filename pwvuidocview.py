@@ -1,5 +1,6 @@
 from pwvdoc    import PWVDoc
 from pwvuicard import PWVCard
+from pwvuicard import PWVEncodedCard
 
 from PyQt6.QtWidgets import QFormLayout
 from PyQt6.QtWidgets import QGroupBox
@@ -31,6 +32,20 @@ class PWVDocView(QWidget):
 
         self._cards= []
         self._buildDocWindow()
+
+    def addEntry(self):
+        self._entryAdded = True
+        nents = len(self._pwvDoc.entries())
+        entry = self._pwvDoc.newEntry()
+        self._pwvDoc.appendEntries([entry])
+        card = PWVCard(entry)
+        self._cards.append(card)
+        vbar = self._docScrollArea.verticalScrollBar()
+        saRect = self._formLayout.contentsRect()
+        self._formLayout.addRow(card)
+        cardGeom = card.geometry()
+        self.updateEntriesCounter()
+        self.updateTitle()
 
     def docView(self):
         return self
@@ -66,20 +81,6 @@ class PWVDocView(QWidget):
         else:
             self.setWindowTitle(title + fname + encoded)
 
-    def addEntry(self):
-        self._entryAdded = True
-        nents = len(self._pwvDoc.entries())
-        entry = self._pwvDoc.newEntry()
-        self._pwvDoc.appendEntries([entry])
-        card = PWVCard(entry)
-        self._cards.append(card)
-        vbar = self._docScrollArea.verticalScrollBar()
-        saRect = self._formLayout.contentsRect()
-        self._formLayout.addRow(card)
-        cardGeom = card.geometry()
-        self.updateEntriesCounter()
-        self.updateTitle()
-
     def decryptDoc(self):
         if not self.pwvDoc().encoded():
             QMessageBox.information(self, "FOO", "Vault is not encoded.")
@@ -94,6 +95,8 @@ class PWVDocView(QWidget):
         if status != "OK":
             QMessageBox.warning(self, status[0], status[1])
             return
+    
+        self._clearCards()
 
         self._buildCards()
         self.updateTitle()
@@ -113,14 +116,12 @@ class PWVDocView(QWidget):
 
         self._pwvDoc.encrypt(pswd1)
         pswd1 = pswd2 = None
-        self._cards.clear()
         
-        for cdx in range(self._formLayout.count()-1, -1, -1):
-            self._formLayout.removeRow(cdx)
-
+        self._clearCards()
+        self._buildCards()
+        
         self.updateTitle()
         self.updateEntriesCounter()
-        
         
     def openFile(self, path=None):
         self._pwvDoc.openDoc(path)
@@ -138,8 +139,18 @@ class PWVDocView(QWidget):
                 card = PWVCard(entry)
                 self._cards.append(card)
                 self._formLayout.addRow(card)
+        else:
+            card = PWVEncodedCard()
+#            self._cards.append(card)
+            self._formLayout.addRow(card)
+            
         self.updateEntriesCounter()
         self.updateTitle()
+
+    def _clearCards(self):
+        self._cards.clear()
+        for cdx in range(self._formLayout.count()-1, -1, -1):
+            self._formLayout.removeRow(cdx)
 
     def _buildDocWindow(self):
         self._formLayout = QFormLayout()
@@ -153,6 +164,10 @@ class PWVDocView(QWidget):
             nents = len(self._pwvDoc.entries())
         else:
             nents = 0
+            card = PWVEncodedCard()
+#            self._cards.append(card)
+            self._formLayout.addRow(card)
+            
         self._entriesGRP = QGroupBox(f"Entries: {nents}")
  
         cards = QWidget()
@@ -161,7 +176,6 @@ class PWVDocView(QWidget):
         self._docScrollArea = scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.verticalScrollBar().rangeChanged.connect(self._docScrollRangeCB)
-#        scroll.setWidget(self._entriesGRP)
         scroll.setWidget(cards)
 
         self._addEntryBTN = QPushButton("+")

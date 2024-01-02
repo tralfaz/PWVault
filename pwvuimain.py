@@ -61,16 +61,21 @@ class PWVMainWin(QMainWindow):
             self._docView.openFile(sys.argv[1])
 
         self.addDocView(self)
-        
 
     def addDocView(self, docView):
         self._docWins.append(docView)
         self.updateWindowsMenu()
 
+    def decodeVault(self):
+        """Public method to invoke _decodeVaultAction"""
+        self._decodeVaultCB()
+        
     def docView(self):
+        """Return the document view associated with this top level window"""
         return self._docView
 
     def pwvDoc(self):
+        """Return the PWVDoc object belonging to the PWVDocView"""
         return self._docView.pwvDoc()
         
     def fileMenuNewVaultCB(self):
@@ -96,7 +101,6 @@ class PWVMainWin(QMainWindow):
         dialog = QFileDialog(self, caption=dlgcap,
                              directory="", filter="*.pwv")
         dialog.setOption(QFileDialog.Option.DontUseNativeDialog)
-#        dialog.setNameFilter("*.pwv *.pwvx")
         dialog.setFilter(QtCore.QDir.Filter.Files)
         dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
         dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
@@ -106,7 +110,7 @@ class PWVMainWin(QMainWindow):
             fnames = dialog.selectedFiles()
             print(f"FNAMES: {repr(fnames)}")
             actWin = QApplication.instance().findActive()
-            if not not actWin.docView().pwvDoc().encoded and \
+            if not actWin.docView().pwvDoc().encoded() and \
                not actWin.docView().pwvDoc().entries():
                 actWin.docView().openFile(fnames[0])
             else:
@@ -251,7 +255,7 @@ class PWVMainWin(QMainWindow):
         saveAsAct.triggered.connect(self.fileMenuSaveAsCB)
         fileMenu.addAction(saveAsAct)
 
-        #        fileMenu.addSeparator()
+#        fileMenu.addSeparator()
 #        fileMenu.addAction(self.exitAct)
 
         self._encodeMenu = self.menuBar().addMenu("Ecoding")
@@ -280,7 +284,8 @@ class PWVMainWin(QMainWindow):
         print(f"_winMenuCB {docView}")
         docView.activateWindow()
         docView.raise_()
-        
+
+
 if __name__ == "__main__":
     from pwvuiapp import PWVApp
 

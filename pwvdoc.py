@@ -49,6 +49,7 @@ class PWVDoc(object):
         }
 
         self._modified = False
+        self._wasDecoded = False
         
     def appendEntries(self, entries):
         docEnts = self.entries()
@@ -76,10 +77,12 @@ class PWVDoc(object):
             return ("ERROR", "Bad password")
 
         entObj = json.loads(decEntStr)
-        print("ENT OBJ", repr(entObj))
         
+        self._wasDecoded = pswdKey
+
         self._docObj[PWVKey.ENTRIES] = entObj
         self._docObj.pop(PWVKey.ENCODED)
+
         return "OK"
         
     def encrypt(self, pswd):
@@ -163,6 +166,9 @@ class PWVDoc(object):
 
     def setModified(self, changed):
         self._modified = changed
+
+    def wasDecoded(self):
+        return self._wasDecoded
 
     def _loadDocJSON(self):
         self._docObj = None

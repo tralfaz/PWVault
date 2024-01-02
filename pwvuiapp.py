@@ -37,7 +37,7 @@ class PWVApp(QApplication):
     def findActive(self):
         actwgt = None
         for tlwgt in QApplication.topLevelWidgets():
-            print(f"TOP WGT: {tlwgt.windowTitle()}  Active: {tlwgt.isActiveWindow()}")
+#            print(f"TOP WGT: {tlwgt.windowTitle()}  Active: {tlwgt.isActiveWindow()}")
             if tlwgt.isActiveWindow():
                 actwgt = tlwgt
         return actwgt
@@ -48,6 +48,8 @@ class PWVApp(QApplication):
         self._assets["copy-button-icon"] = icon
         icon = QtGui.QIcon("assets/edit-button-icon.png")
         self._assets["edit-button-icon"] = icon
+        icon = QtGui.QIcon("assets/padlock-icon.png")
+        self._assets["padlock-icon"] = icon
         
         
 if __name__ == "__main__":
