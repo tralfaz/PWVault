@@ -94,10 +94,14 @@ class PWVDoc(object):
         except KeyError as keyx:
             return ("ERROR", "No entries")
 
+        if self.wasDecoded() and pswd is None:
+            pswdKey = self._wasDecoded
+        else:
+            pswdKey = MakePasswordKey(pswd)
+            pswd = None
+            self._wasDecoded = None
+        
         jsonEntStr = json.dumps(entries, indent=4)
-
-        pswdKey = MakePasswordKey(pswd)
-        pswd = None
 
         encEntStr = EncryptStrToStr(pswdKey, jsonEntStr)
 

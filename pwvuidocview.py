@@ -101,19 +101,22 @@ class PWVDocView(QWidget):
         self._buildCards()
         self.updateTitle()
         
-    def encryptDoc(self):
+    def encryptDoc(self, recode=True):
         #msgBox = QMessageBox.information(self, "FOO", "BAR")
         if self.pwvDoc().encoded():
             QMessageBox.information(self, "FOO", "Vault is already encoded.")
             return
 
-        pswd1 = self.queryPswd("Vault Password")
-        print(f"PSWD: {pswd1}")
-        pswd2 = self.queryPswd("Confirm Password")
-        if pswd1 != pswd2:
-            QMessageBox.warning(self, "XXX", "Passwords do not match.")
-            return
+        if recode or not self._pwvDoc.wasDecoded():
+            pswd1 = self.queryPswd("Vault Password")
+            pswd2 = self.queryPswd("Confirm Password")
+            if pswd1 != pswd2:
+                QMessageBox.warning(self, "XXX", "Passwords do not match.")
+                return
+        else:
+            pswd1 = None
 
+        self._getCardValues()
         self._pwvDoc.encrypt(pswd1)
         pswd1 = pswd2 = None
         

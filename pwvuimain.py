@@ -12,7 +12,6 @@ from PyQt6 import QtGui
 from PyQt6.QtGui import QAction
 from PyQt6.QtGui import QKeySequence
 from PyQt6.QtGui import QShortcut
-
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtWidgets import QFileDialog
 from PyQt6.QtWidgets import QFormLayout
@@ -24,6 +23,7 @@ from PyQt6.QtWidgets import QLabel
 from PyQt6.QtWidgets import QLineEdit
 from PyQt6.QtWidgets import QMainWindow
 from PyQt6.QtWidgets import QMenuBar
+from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtWidgets import QScrollArea
 from PyQt6.QtWidgets import QVBoxLayout
@@ -144,6 +144,7 @@ class PWVMainWin(QMainWindow):
         print("DOCVIEW: ", docView)
         docPath = docView.pwvDoc().path()
         print(f"WIN DOC PATH {docPath}")
+                
         if not docPath:
             dlgcap = "Save current vault"
             docPath,fset = QFileDialog.getSaveFileName(self, caption=dlgcap)
@@ -153,6 +154,14 @@ class PWVMainWin(QMainWindow):
 
         if not docPath.endswith(".pwv") and not docPath.endswith(".pwvx"):
             docPath += ".pwv"
+
+        if docView.pwvDoc().wasDecoded():
+            choice = self._saveWasDecodedDialog()
+            print(f"CHOICE: {choice}")
+            if  choice == "Keep":
+                docView.encryptDoc(False)
+            else:
+                return
 
         docView.saveFile(docPath)
         docView.pwvDoc().setModified(False)
@@ -212,15 +221,6 @@ class PWVMainWin(QMainWindow):
         print("_appMenuQuitCB")
         PWVApp.instance().quit()
         
-    def _docScrollRangeCB(self, xr, yr):
-        print(f"_docScrollRangeCB({xr}, {yr})")
-        print("FORM GEOM: ", self._formLayout.contentsRect())
-        vbar = self._docScrollArea.verticalScrollBar()
-        print("VBAR MAX:", vbar.maximum())
-        if self._entryAdded:
-            self._entryAdded = False
-            vbar.setValue(vbar.maximum())
-
     def _buildMenus(self):
         print("_buildMenus")
         fileMenu = self.menuBar().addMenu("&File")
@@ -276,9 +276,45 @@ class PWVMainWin(QMainWindow):
         actWin = QApplication.instance().findActive()
         actWin.docView().decryptDoc()
 
+    def _docScrollRangeCB(self, xr, yr):
+        print(f"_docScrollRangeCB({xr}, {yr})")
+        print("FORM GEOM: ", self._formLayout.contentsRect())
+        vbar = self._docScrollArea.verticalScrollBar()
+        print("VBAR MAX:", vbar.maximum())
+        if self._entryAdded:
+            self._entryAdded = False
+            vbar.setValue(vbar.maximum())
+
     def _encodeVaultCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView().encryptDoc()
+
+    def _saveWasDecodedDialog(self):
+        title = "<H2>Was Encoded</H2>"
+        msgBox = QMessageBox(QMessageBox.Icon.Warning,
+                             title,
+                             title + "<P>Choose save mode.</P>",
+                             QMessageBox.StandardButton.NoButton, self)
+        info = """<B>Keep</B>, save with previous encoding<P>
+<B>Recode</B>, save with different encoding<P>
+<B>Clear</B>, save with no encoding"""
+        msgBox.setInformativeText(info)
+#        msgBox.setDetailedText('"A long time ago in a galaxy far, far away...."')
+        keepBTN   = msgBox.addButton("&Keep", QMessageBox.ButtonRole.AcceptRole)
+        recodeBTN = msgBox.addButton("Recode", QMessageBox.ButtonRole.ResetRole)
+        clearBTN = msgBox.addButton("Clear", QMessageBox.ButtonRole.DestructiveRole)
+        cancelBTN = msgBox.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+
+        msgBox.exec()
+        dlgBTN = msgBox.clickedButton()
+        if dlgBTN == keepBTN:
+            return "Keep"
+        elif dlgBTN == recodeBTN:
+            return "Recode"
+        elif dlgBTN == clearBTN:
+            return "Clear"
+        else:
+            return "Cancel"
 
     def _winMenuCB(self, docView):
         print(f"_winMenuCB {docView}")
