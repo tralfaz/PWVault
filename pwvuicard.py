@@ -7,18 +7,17 @@ from pwvuiapp import PWVApp
 from PyQt6 import QtCore
 from PyQt6 import QtGui
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QFormLayout
 from PyQt6.QtWidgets import QFrame
+from PyQt6.QtWidgets import QGroupBox
 from PyQt6.QtWidgets import QHBoxLayout
 from PyQt6.QtWidgets import QLabel
 from PyQt6.QtWidgets import QLineEdit
 from PyQt6.QtWidgets import QPushButton
+from PyQt6.QtWidgets import QScrollArea
 from PyQt6.QtWidgets import QTextEdit
 from PyQt6.QtWidgets import QVBoxLayout
 from PyQt6.QtWidgets import QWidget
-
-from PyQt6.QtWidgets import QGroupBox
-from PyQt6.QtWidgets import QFormLayout
-from PyQt6.QtWidgets import QScrollArea
 
 
 class PWVCardField(QWidget):
@@ -77,7 +76,7 @@ class PWVCardField(QWidget):
         return self._valLBL.text()
 
     def setEditDoneFunctor(self, func, *args):
-        self._editDoneFunctor = partial(func, *args)
+        self._editDoneFunctor = partial(func, self, *args)
         
     def setURL(self, url):
         self._valPlain = url
@@ -101,7 +100,6 @@ class PWVCardField(QWidget):
         return f'<A HREF="{self._plainText}">{self._plainText}</A>'
 
     def _copyCB(self):
-        print("PWVCardField._copyCB")
         clipb = QApplication.clipboard()
         clipb.setText(self._valPlain)
     
@@ -110,9 +108,10 @@ class PWVCardField(QWidget):
         self._valLBL.setVisible(False)
         self._valLE.setText(self._valPlain)
         self._valLE.setVisible(True)
+        self._valLE.setFocus()
+        self._valLE.selectAll()
 
     def _editDoneCB(self):
-        print(f"PWVFieldEdit._editDoneCB: {self._valLE.text()}")
         newtxt = self._valLE.text()
         if self._valUrl:
             self.setURL(newtxt)
@@ -183,16 +182,25 @@ class PWVCard(QFrame):
         self._expandBTN.clicked.connect(self._expandCB)
         vbox.addWidget(self._expandBTN)
         
-#        vbox.addLayout(expVbox)
-
         self.setLayout(vbox)
 
-    def _cfEditDoneCB(cfWgt, entry, key):
-        print(f"_cfEditDoneCB: {entry} {key}")
+    def searchMatch(self, text, fullSearch=False):
+        if not text:
+            return True
+        if text.lower() in self._entry.get(PWVKey.ID, "").lower():
+            return True
+        return False
+
+    def selected(self):
+        return self.property("selected") == "true"
+
+    def _cfEditDoneCB(self, cfWgt, entry, key):
+#        print(f"_cfEditDoneCB: {cfWgt} {entry} {key}")
+        print(f"_cfEditDoneCB: FIX ME")
+#        if entry.get(key) is not None:
 
     def _notesChangedCB(self):
         newtxt = self._notesTXT.toPlainText()
-#        print(f"NEWTXT: {newtxt}")
         self._entry[PWVKey.NOTES] = newtxt 
         self.window().docView().pwvDoc().setModified(True)
         self.window().docView().updateTitle()
@@ -204,19 +212,19 @@ class PWVCard(QFrame):
         self._entry[PWVKey.PSWD]  = self._pswdCF.plainText()
         self._entry[PWVKey.NOTES] = self._notesTXT.toPlainText()
         
-    def pswdCopyCB(self):
-        clipb = QApplication.clipboard()
-        clipb.setText(self._entry.get(PWVKey.PSWD, ""))
+#    def pswdCopyCB(self):
+#        clipb = QApplication.clipboard()
+#        clipb.setText(self._entry.get(PWVKey.PSWD, ""))
 
-    def urlCopyCB(self):
-        print("urlCopyCB() %r" % self._entry.get(PWVKey.URL, ""))
-        clipb = QApplication.clipboard()
-        clipb.setText(self._entry.get(PWVKey.URL, ""))
+#    def urlCopyCB(self):
+#        print("urlCopyCB() %r" % self._entry.get(PWVKey.URL, ""))
+#        clipb = QApplication.clipboard()
+#        clipb.setText(self._entry.get(PWVKey.URL, ""))
 
-    def userCopyCB(self):
-        print("userCopyCB()")
-        clipb = QApplication.clipboard()
-        clipb.setText(self._entry.get(PWVKey.USER, ""))
+#    def userCopyCB(self):
+#        print("userCopyCB()")
+#        clipb = QApplication.clipboard()
+#        clipb.setText(self._entry.get(PWVKey.USER, ""))
 
     # EVENTS
     def mousePressEvent(self, qMouseEvt):
@@ -298,7 +306,7 @@ class PWVEncodedCard(QFrame):
 class PWVWindow(QWidget):
     def __init__(self, val):
         super().__init__()
-        self.title = "PyQt5 Scroll Bar"
+        self.title = "PyQt56 Scroll Bar"
         self.top = 200
         self.left = 500
         self.width = 400
@@ -310,10 +318,6 @@ class PWVWindow(QWidget):
         groupBox = QGroupBox("This Is Group Box")
         labelLis = []
         comboList = []
-#        for i in  range(val):
-#            labelLis.append(QLabel("Label"))
-#            comboList.append(QPushButton("Click Me"))
-#            formLayout.addRow(labelLis[i], comboList[i])
 
         for i in  range(val):
             entry = {
@@ -334,11 +338,6 @@ class PWVWindow(QWidget):
         layout.addWidget(scroll)
         self.show()
 
-
-#class PWVApp(QApplication):
-#
-#    def __init__(self):
-#        super().__init__(sys.argv)
 
 if __name__ == "__main__":
     from pwvuimain import PWVApp

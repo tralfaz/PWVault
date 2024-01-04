@@ -59,6 +59,14 @@ class PWVDoc(object):
             docEnts.append(entries)
         self.setModified(True)
 
+    def searchCompletions(self, fullSearch=False):
+        comps = []
+        if self.encoded():
+            return comps
+        for entry in self.entries():
+            comps.append(entry.get(PWVKey.ID,""))
+        return comps
+        
     def decrypt(self, pswd):
         if not self.isEncrypted():
             return ("ERROR", "Document not encrypted")

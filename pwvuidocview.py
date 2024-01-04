@@ -2,6 +2,8 @@ from pwvdoc    import PWVDoc
 from pwvuicard import PWVCard
 from pwvuicard import PWVEncodedCard
 
+from PyQt6           import QtCore
+from PyQt6.QtWidgets import QCompleter
 from PyQt6.QtWidgets import QFormLayout
 from PyQt6.QtWidgets import QGroupBox
 from PyQt6.QtWidgets import QInputDialog
@@ -138,15 +140,19 @@ class PWVDocView(QWidget):
         
     def _buildCards(self):
         if not self._pwvDoc.encoded():
+            self._searchLE.setVisible(True)
             for entry in self._pwvDoc.entries():
                 card = PWVCard(entry)
                 self._cards.append(card)
                 self._formLayout.addRow(card)
+            self._searchMODL.setStringList(self._pwvDoc.searchCompletions())
+
         else:
+            self._searchLE.setVisible(False)
             card = PWVEncodedCard()
 #            self._cards.append(card)
             self._formLayout.addRow(card)
-            
+
         self.updateEntriesCounter()
         self.updateTitle()
 
@@ -158,7 +164,19 @@ class PWVDocView(QWidget):
     def _buildDocWindow(self):
         self._formLayout = QFormLayout()
         self._formLayout.setContentsMargins(0, 0, 0, 0)
+        self._searchLE = QLineEdit()
+        self._searchLE.setPlaceholderText("Search Entries, Start with ~ for complete search")
+        self._searchLE.textChanged.connect(self._searchCB)
+
+        # Adding Completer.
+        self._searchMODL = QtCore.QStringListModel()
+        self._searchMODL.setStringList(self._pwvDoc.searchCompletions())
+        self._searchCMPL = QCompleter(self._searchMODL, self._searchLE)
+        self._searchCMPL.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)
+        self._searchLE.setCompleter(self._searchCMPL)
+
         if not self._pwvDoc.encoded():
+            self._searchLE.setVisible(True)
             for entry in self._pwvDoc.entries():
                 card = PWVCard(entry)
                 self._cards.append(card)
@@ -167,6 +185,8 @@ class PWVDocView(QWidget):
             nents = len(self._pwvDoc.entries())
         else:
             nents = 0
+            print("_searchLE.setVisible(False)")
+            self._searchLE.setVisible(False)
             card = PWVEncodedCard()
 #            self._cards.append(card)
             self._formLayout.addRow(card)
@@ -185,6 +205,7 @@ class PWVDocView(QWidget):
         self._addEntryBTN.clicked.connect(self.addEntry)
 
         vbox = QVBoxLayout()
+        vbox.addWidget(self._searchLE)
         vbox.addWidget(self._entriesGRP)
         vbox.addWidget(scroll)
         vbox.addWidget(self._addEntryBTN)
@@ -200,3 +221,8 @@ class PWVDocView(QWidget):
         print(f"_getCardValues RC: {len(self._cards)}")
         for card in  self._cards:
             card.entryUpdate()
+
+    def _searchCB(self, text):
+        for card in self._cards:
+            card.setVisible(card.searchMatch(text))
+
