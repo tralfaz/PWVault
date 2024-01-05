@@ -29,7 +29,6 @@ class PWVCardField(QWidget):
         self._valPlain   = val
         self._valFormat  = fmt
         self._valUrl     = url
-        self._editDoneFunctor = None
         
         self._idLBL  = QLabel(f"<big><b>{id}:</b></big>")
         self._valLBL = QLabel(val)
@@ -69,15 +68,15 @@ class PWVCardField(QWidget):
         hbox.addWidget(self._editBTN)
         self.setLayout(hbox)
 
+    def addEditDoneCallback(self, func, *args):
+        self._valLE.editingFinished.connect(partial(func, self, *args))
+
     def plainText(self):
         return self._valPlain
 
     def richText(self):
         return self._valLBL.text()
 
-    def setEditDoneFunctor(self, func, *args):
-        self._editDoneFunctor = partial(func, self, *args)
-        
     def setURL(self, url):
         self._valPlain = url
         self._valURL   = True
@@ -122,8 +121,7 @@ class PWVCardField(QWidget):
         self._valPlain = newtxt
         self._valLBL.setVisible(True)
         self._valLE.setVisible(False)
-        if self._editDoneFunctor:
-            self._editDoneFunctor()
+        #MOVE
         self.window().docView().pwvDoc().setModified(True)
         self.window().docView().updateTitle()
 
@@ -152,19 +150,23 @@ class PWVCard(QFrame):
         eid = entry.get(PWVKey.ID,"<I>Missing: ID</I>")
         self._idCF = PWVCardField(id="ID", val=eid, ctrls="CE",
                                   fmt='<b><font color="white">{0}</font></b>')
-        self._idCF.setEditDoneFunctor(self._cfEditDoneCB, entry, PWVKey.ID)
+        self._idCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.ID)
         vbox.addWidget(self._idCF)
         
         eurl = entry.get(PWVKey.URL, "<I>Missing: URL</I>")
         self._urlCF = PWVCardField(id="URL", val=eurl, url=True, ctrls="CE")
+        self._urlCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.URL)
         vbox.addWidget(self._urlCF)
         
         euser = entry.get(PWVKey.USER, "<I>Missing: USER</I>")
         upfmt = '<b><font color="yellow">{0}</font></b>'
         self._userCF = PWVCardField(id="USER", val=euser, fmt=upfmt, ctrls="CE")
+        self._userCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.USER)
         vbox.addWidget(self._userCF)
+        
         epswd = entry.get(PWVKey.PSWD, "<I>Missing: PSWD</I>")
         self._pswdCF = PWVCardField(id="PSWD", val=epswd, fmt=upfmt, ctrls="CE")
+        self._pswdCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.PSWD)
         vbox.addWidget(self._pswdCF)
 
         expVbox = QVBoxLayout()
@@ -187,7 +189,10 @@ class PWVCard(QFrame):
     def searchMatch(self, text, fullSearch=False):
         if not text:
             return True
-        if text.lower() in self._entry.get(PWVKey.ID, "").lower():
+        text = text.lower()
+        if text in self._entry.get(PWVKey.ID, "").lower():
+            return True
+        if fullSearch and text in self._entry.get(PWVKey.NOTES, "").lower():
             return True
         return False
 
@@ -195,9 +200,9 @@ class PWVCard(QFrame):
         return self.property("selected") == "true"
 
     def _cfEditDoneCB(self, cfWgt, entry, key):
-#        print(f"_cfEditDoneCB: {cfWgt} {entry} {key}")
-        print(f"_cfEditDoneCB: FIX ME")
-#        if entry.get(key) is not None:
+        #print(f"_cfEditDoneCB: {cfWgt} {key}\nBEFORE: {entry}")
+        if entry.get(key) is not None:
+            entry[key] = cfWgt.plainText()
 
     def _notesChangedCB(self):
         newtxt = self._notesTXT.toPlainText()

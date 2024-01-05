@@ -60,11 +60,11 @@ class PWVDoc(object):
         self.setModified(True)
 
     def searchCompletions(self, fullSearch=False):
-        comps = []
+        comps = set([])
         if self.encoded():
             return comps
         for entry in self.entries():
-            comps.append(entry.get(PWVKey.ID,""))
+            comps.update(entry.get(PWVKey.ID,"").split())
         return comps
         
     def decrypt(self, pswd):

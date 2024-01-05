@@ -118,7 +118,7 @@ class PWVDocView(QWidget):
         else:
             pswd1 = None
 
-        self._getCardValues()
+#        self._getCardValues()
         self._pwvDoc.encrypt(pswd1)
         pswd1 = pswd2 = None
         
@@ -135,7 +135,7 @@ class PWVDocView(QWidget):
         self.updateTitle()
 
     def saveFile(self, path=None):
-        self._getCardValues()
+#        self._getCardValues()
         self._pwvDoc.saveDocAs(path)
         
     def _buildCards(self):
@@ -223,6 +223,10 @@ class PWVDocView(QWidget):
             card.entryUpdate()
 
     def _searchCB(self, text):
+        fullSearch = False
+        if text.startswith("%"):
+            fullSearch = True
+            text = text[1:]
         for card in self._cards:
-            card.setVisible(card.searchMatch(text))
+            card.setVisible(card.searchMatch(text, fullSearch))
 
