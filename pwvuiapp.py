@@ -1,3 +1,4 @@
+import os
 import sys
 
 from PyQt6 import QtGui
@@ -14,6 +15,7 @@ class PWVApp(QApplication):
         self.focusChanged.connect(self._focusChangedCB)
 
         self._loadAssets()
+        self._setAppWideStyles()
 
     def asset(self, name):
         return self._assets.get(name)
@@ -43,15 +45,37 @@ class PWVApp(QApplication):
         return actwgt
 
     def _loadAssets(self):
+        folder = os.path.dirname(__file__)
+        folder = os.path.join(folder, "assets")
         self._assets = {}
-        icon = QtGui.QIcon("assets/copy-button-icon.png")
+        icon = QtGui.QIcon(os.path.join(folder, "copy-button-icon.png"))
         self._assets["copy-button-icon"] = icon
-        icon = QtGui.QIcon("assets/edit-button-icon.png")
+        icon = QtGui.QIcon(os.path.join(folder, "edit-button-icon.png"))
         self._assets["edit-button-icon"] = icon
-        icon = QtGui.QIcon("assets/padlock-icon.png")
+        icon = QtGui.QIcon(os.path.join(folder, "padlock-icon.png"))
         self._assets["padlock-icon"] = icon
-        
-        
+        icon = QtGui.QIcon(os.path.join(folder, "eye-open-yellow.svg"))
+        self._assets["eye-open-yellow"] = icon
+        icon = QtGui.QIcon(os.path.join(folder, "eye-blocked-yellow"))
+        self._assets["eye-blocked-yellow"] = icon
+
+    def _setAppWideStyles(self):
+        self.setStyleSheet("""
+        QLineEdit[echoMode="2"] {
+          lineedit-password-character: 9679;
+        }
+        QInputDialog {
+          background-color: red;
+        }
+        QLineEdit {
+          background-color: blue;
+        }
+        QInputDialog*QLineEdit[echoMode="2"] {
+              lineedit-password-character: 9679;
+            }
+        """)
+
+
 if __name__ == "__main__":
     from pwvuimain import PWVMainWin
     

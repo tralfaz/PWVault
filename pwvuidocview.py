@@ -89,7 +89,8 @@ class PWVDocView(QWidget):
             return
 
         pswd = self.queryPswd("Vault Password")
-        print(f"PSWD: {pswd}")
+        if not pswd:
+            return
 
         status = self._pwvDoc.decrypt(pswd)
         print(f"STATUS: {status}")
@@ -111,6 +112,8 @@ class PWVDocView(QWidget):
 
         if recode or not self._pwvDoc.wasDecoded():
             pswd1 = self.queryPswd("Vault Password")
+            if not pswd1:
+                return
             pswd2 = self.queryPswd("Confirm Password")
             if pswd1 != pswd2:
                 QMessageBox.warning(self, "XXX", "Passwords do not match.")
