@@ -1,11 +1,32 @@
+import random
+import string
+
 from pwvuiapp import PWVApp
 
 from PyQt6.QtCore    import Qt
 from PyQt6.QtWidgets import QDialog
 from PyQt6.QtWidgets import QDialogButtonBox
+from PyQt6.QtWidgets import QHBoxLayout
 from PyQt6.QtWidgets import QLabel
 from PyQt6.QtWidgets import QLineEdit
 from PyQt6.QtWidgets import QVBoxLayout
+
+
+def GeneratePassword(length=12, puncts=string.punctuation):
+    allChars = string.ascii_letters + string.digits + puncts
+
+    # randomly select at least one character from each character set above
+    pswd =  [ random.choice(string.digits),
+              random.choice(string.ascii_uppercase),
+              random.choice(string.ascii_lowercase),
+              random.choice(puncts) ]
+
+    for _ in range(length-4):
+        pswd.append(random.choice(allChars))
+        random.shuffle(pswd)
+
+    return "".join(pswd)
+    
 
 class PWVPswdLineEdit(QLineEdit):
     """Password LineEdit with icons to show/hide password entries."""
@@ -45,54 +66,122 @@ class PWVPswdLineEdit(QLineEdit):
         self._hideText = not self._hideText
 
 
+class PWVPswdLabel(PWVPswdLineEdit):
 
-class PWVPswdDialog(QDialog):
+    def __init__(self, text=None, parent=None, hideText=True):
+        super().__init__(hideText, parent)
+        self.setText(text)
+        self.setReadOnly(True)
 
-    def __init__(self, parent=None):
+        self.setStyleSheet("""
+            PWVPswdLabel {
+              background: rgba(0,0,0, 0.0);
+              border: 0px solid rgba(0,0,0, 0.0);
+            }
+            PWVPswdLabel[echoMode="2"] {
+              lineedit-password-character: 9679;
+            }
+            """)
+#QLineEdit[readOnly="true"] {
+#  background: rgba(40,40,40, 1.0);
+#  border: 1px solid rgba(50,50,50, 1.0);
+#}
+
+class PWVGeneratePswDialog(QDialog):
+
+    def __init__(self, parent=None, title="", prompt=""):
         super().__init__(parent)
 
+        self.setWindowTitle(title)
         self.setAttribute(Qt.WidgetAttribute.WA_QuitOnClose, False)
-        vbox = QVBoxLayout()
-        vbox.addWidget(QLabel("Type in your text:"))
-        self.le = PWVPswdLineEdit()
-    # le.setText("Profile")
-    # le.selectAll()
-        self.le.setPlaceholderText("Profile")
-        vbox.addWidget(self.le)
-#        leVal = QRegExpValidator(QRegExp("[\\w\\d_ \\.]{24}"))
-#        le.setValidator(v);
+
+
+        promptLBL = QLabel(prompt)
+
+        self._pswdLBL = PWVPswdLabel("ABCDEF")
+
+        specialBox = QHBoxLayout()
+        for schr in string.punctuation:
+            scBTN = QPushButton(schr)
+            scBTN.setObjectName("SpecialCharToggle")
+            scBTN.setCheckable(True)
+            scBTN.setChecked(True)
+            scBTN.setFlat(True)
+#                QPushButton[accessibleName="SpecialCharToggle"] {
+            scBTN.setStyleSheet("""
+                QPushButton#SpecialCharToggle {
+                  border: 2px solid red;
+                }
+                QPushButton#SpecialCharToggle:checked {
+                  border: 2px solid green;
+                }
+            """)
+            
+            specialBox.addWidget(scBTN)
+
         buttonBox = QDialogButtonBox()
-        #QDialogButtonBox.StandardButton.Ok |
-        #                             QDialogButtonBox.StandardButton.Cancel)
-        #buttonBox.addButton("Help", QtGui.QDialogButtonBox.HelpRole)
         buttonBox.addButton("OK", QDialogButtonBox.ButtonRole.AcceptRole)
         buttonBox.addButton("Cancel", QDialogButtonBox.ButtonRole.RejectRole)
+        buttonBox.accepted.connect(self._okCB)
+        buttonBox.rejected.connect(self._cancelCB)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(promptLBL)
+        vbox.addWidget(self._pswdLBL)
+        vbox.addLayout(specialBox)
         vbox.addWidget(buttonBox)
         self.setLayout(vbox)
 
-        #
-
-#    def signals_connection(self):
-#        self.test_random.clicked.connect(self.test_rand)
-#
-#        # Is this the latest/correct way to write it?
-        buttonBox.accepted.connect(self._okCB)
-        buttonBox.rejected.connect(self._cancelCB)
-#        buttonBox.helpRequested.connect(self.test_help)
-#        self.accepted.connect(self.
-#      connect(buttonBox, SIGNAL(accepted()), this, SIGNAL(accepted()));
-#      connect(buttonBox, SIGNAL(rejected()), this, SIGNAL(rejected()));
-
     def _cancelCB(self):
-        print("_cancelCB")
         self.close()
 
     def _okCB(self):
-        print("_okCB")
+        self.accept()
+
+ 
+class PWVPswdDialog(QDialog):
+
+    def __init__(self, parent=None, title="", prompt="", placeholder=""):
+        super().__init__(parent)
+
+        self.setWindowTitle(title)
+        self.setAttribute(Qt.WidgetAttribute.WA_QuitOnClose, False)
+
+        promptLBL = QLabel(prompt)
+        self._pswdLE = PWVPswdLineEdit()
+        self._pswdLE.setPlaceholderText(placeholder)
+        buttonBox = QDialogButtonBox()
+        buttonBox.addButton("OK", QDialogButtonBox.ButtonRole.AcceptRole)
+        buttonBox.addButton("Cancel", QDialogButtonBox.ButtonRole.RejectRole)
+        buttonBox.accepted.connect(self._okCB)
+        buttonBox.rejected.connect(self._cancelCB)
+#        leVal = QRegExpValidator(QRegExp("[\\w\\d_ \\.]{24}"))
+#        le.setValidator(leVal)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(promptLBL)
+        vbox.addWidget(self._pswdLE)
+        vbox.addWidget(buttonBox)
+        self.setLayout(vbox)
+
+    def _cancelCB(self):
+        self.close()
+
+    def _okCB(self):
         self.accept()
 
     def getNewValue(self):
-        return self.le.text()
+        return self._pswdLE.text()
+
+    @classmethod
+    def getText(clazz, parent=None, title="", prompt="", placeholder=""):
+        dialog = PWVPswdDialog(parent, title, prompt, placeholder)
+        status = dialog.exec()
+        if status:
+            return (dialog._pswdLE.text(), True)
+        else:
+            return ("", False)
+
 
 
 if __name__ == "__main__":
@@ -104,35 +193,36 @@ if __name__ == "__main__":
             super().__init__(parent)
     
             self.setStyleSheet("""
-              QLineEdit[echoMode="2"] {
-                lineedit-password-character: 9679;
-              }
-              QInputDialog {
-                background-color: red;
-              }
-              QLineEdit {
-                background-color: blue;
-              }
               QInputDialog QLineEdit[echoMode="2"] {
                 lineedit-password-character: 9679;
-              }
+                background-color: green;
+            }
               """)
 
             pswdLE = PWVPswdLineEdit()
+            self._pswdLBL = PWVPswdLabel("ABCDEF")
 
-            testBTN = QPushButton("TEST")
-            testBTN.clicked.connect(self._testCB)
-
+            test1BTN = QPushButton("TEST 1")
+            test1BTN.clicked.connect(self._test1CB)
             test2BTN = QPushButton("TEST 2")
             test2BTN.clicked.connect(self._test2CB)
+            test3BTN = QPushButton("TEST 3")
+            test3BTN.clicked.connect(self._test3CB)
+            test4BTN = QPushButton("TEST 4")
+            test4BTN.clicked.connect(self._test4CB)
+            test4BTN = QPushButton("TEST 5")
+            test4BTN.clicked.connect(self._test5CB)
 
             vbox = QVBoxLayout()
             vbox.addWidget(pswdLE)
-            vbox.addWidget(testBTN)
+            vbox.addWidget(self._pswdLBL)
+            vbox.addWidget(test1BTN)
             vbox.addWidget(test2BTN)
+            vbox.addWidget(test3BTN)
+            vbox.addWidget(test4BTN)
             self.setLayout(vbox)
 
-        def _testCB(self):
+        def _test1CB(self):
             title = "THE TITLE"
             text, ok = QInputDialog.getText(self, title,
                                             "Password:",
@@ -140,14 +230,30 @@ if __name__ == "__main__":
             print(f"TEXT({text})  OK:{ok}")
 
         def _test2CB(self):
-             dialog = PWVPswdDialog(self)
+             dialog = PWVPswdDialog(self, "Title", "Enter Password", "Password")
              status = dialog.exec()
              print(f"STATUS: {status}")
              if status  == QDialog.DialogCode.Accepted:
                  retVal = dialog.getNewValue()
                  print(f"Dialog value: {retVal}")
 
-    
+        def _test3CB(self):
+            title = "THE TITLE"
+            text, ok = PWVPswdDialog.getText(self, title, "Enter Password:",
+                                            "password")
+            print(f"TEXT({text})  OK:{ok}")
+
+        def _test4CB(self):
+            newPswd = GeneratePassword(12)
+            self._pswdLBL.setText(newPswd)
+
+        def _test5CB(self):
+            title = "Generate Secure Password"
+            prompt = "Choose generation options then click Generate"
+            dialog = PWVGeneratePswDialog(self, title, prompt)
+            status = dialog.exec()
+
+    ## TEST            
     app = PWVApp()
 
     win = TestFrame()

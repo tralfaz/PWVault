@@ -1,4 +1,5 @@
 from pwvdoc    import PWVDoc
+from pwvuipswd import PWVPswdDialog
 from pwvuicard import PWVCard
 from pwvuicard import PWVEncodedCard
 
@@ -56,9 +57,10 @@ class PWVDocView(QWidget):
         return self._pwvDoc
     
     def queryPswd(self, title):
-        text, ok = QInputDialog.getText(self, title,
-                                        "Password:",
-                                        QLineEdit.EchoMode.Password)
+#        text, ok = QInputDialog.getText(self, title,
+#                                        "Password:",
+#                                        QLineEdit.EchoMode.Password)
+        text, ok = PWVPswdDialog.getText(self, title, "Password:")
         if ok and text:
             return text
         return None
@@ -93,7 +95,6 @@ class PWVDocView(QWidget):
             return
 
         status = self._pwvDoc.decrypt(pswd)
-        print(f"STATUS: {status}")
 
         if status != "OK":
             QMessageBox.warning(self, status[0], status[1])

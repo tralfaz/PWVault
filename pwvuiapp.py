@@ -60,20 +60,15 @@ class PWVApp(QApplication):
         self._assets["eye-blocked-yellow"] = icon
 
     def _setAppWideStyles(self):
-        self.setStyleSheet("""
-        QLineEdit[echoMode="2"] {
-          lineedit-password-character: 9679;
-        }
-        QInputDialog {
-          background-color: red;
-        }
-        QLineEdit {
-          background-color: blue;
-        }
-        QInputDialog*QLineEdit[echoMode="2"] {
-              lineedit-password-character: 9679;
-            }
-        """)
+        pass
+#        self.setStyleSheet("""
+#        QLineEdit[echoMode="2"] {
+#          lineedit-password-character: 9679;
+#        }
+#        QInputDialog QLineEdit[echoMode="2"] {
+#              lineedit-password-character: 9679;
+#            }
+#        """)
 
 
 if __name__ == "__main__":

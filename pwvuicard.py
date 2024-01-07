@@ -3,6 +3,8 @@ import sys
  
 from pwvdoc import PWVKey
 from pwvuiapp import PWVApp
+from pwvuipswd import PWVPswdLabel
+from pwvuipswd import PWVPswdLineEdit
 
 from PyQt6 import QtCore
 from PyQt6 import QtGui
@@ -23,7 +25,7 @@ from PyQt6.QtWidgets import QWidget
 class PWVCardField(QWidget):
 
     def __init__(self, parent=None, id="", val="", fmt=None,  spaces=None,
-                 ctrls="CE", url=False):
+                 ctrls="CE", url=False, pswd=False):
         super().__init__(parent)
 
         self._valPlain   = val
@@ -31,13 +33,19 @@ class PWVCardField(QWidget):
         self._valUrl     = url
         
         self._idLBL  = QLabel(f"<big><b>{id}:</b></big>")
-        self._valLBL = QLabel(val)
+        if pswd:
+            self._valLBL = PWVPswdLabel(val)
+        else: 
+            self._valLBL = QLabel(val)
         if fmt and not url:
             self._valLBL.setText(fmt.format(val))
         elif url:
             self.setURL(val)
-        self._valLBL.setOpenExternalLinks(url)
-        self._valLE  = QLineEdit()
+            self._valLBL.setOpenExternalLinks(url)
+        if pswd:
+            self._valLE  = PWVPswdLineEdit()
+        else:
+            self._valLE  = QLineEdit()
         self._valLE.setVisible(False)
         self._valLE.editingFinished.connect(self._editDoneCB)
         icon = PWVApp.instance().asset("copy-button-icon")
@@ -165,7 +173,7 @@ class PWVCard(QFrame):
         vbox.addWidget(self._userCF)
         
         epswd = entry.get(PWVKey.PSWD, "<I>Missing: PSWD</I>")
-        self._pswdCF = PWVCardField(id="PSWD", val=epswd, fmt=upfmt, ctrls="CE")
+        self._pswdCF = PWVCardField(id="PSWD", val=epswd, ctrls="CE", pswd=True)
         self._pswdCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.PSWD)
         vbox.addWidget(self._pswdCF)
 
