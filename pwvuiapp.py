@@ -56,8 +56,10 @@ class PWVApp(QApplication):
         self._assets["padlock-icon"] = icon
         icon = QtGui.QIcon(os.path.join(folder, "eye-open-yellow.svg"))
         self._assets["eye-open-yellow"] = icon
-        icon = QtGui.QIcon(os.path.join(folder, "eye-blocked-yellow"))
+        icon = QtGui.QIcon(os.path.join(folder, "eye-blocked-yellow.svg"))
         self._assets["eye-blocked-yellow"] = icon
+        icon = QtGui.QIcon(os.path.join(folder, "search-icon-yellow.svg"))
+        self._assets["search-icon-yellow"] = icon
 
     def _setAppWideStyles(self):
         pass

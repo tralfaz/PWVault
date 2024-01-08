@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import QGroupBox
 from PyQt6.QtWidgets import QHBoxLayout
 from PyQt6.QtWidgets import QLabel
 from PyQt6.QtWidgets import QLineEdit
+from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtWidgets import QSlider
 from PyQt6.QtWidgets import QVBoxLayout
 
@@ -90,21 +91,46 @@ class PWVPswdLabel(PWVPswdLineEdit):
 #  border: 1px solid rgba(50,50,50, 1.0);
 #}
 
-class PWVGeneratePswDialog(QDialog):
 
-    safeSpecials = '!#$%&*+,-./:;<=>?@^_`|~'
+
+class PWVGeneratePswdDialog(QDialog):
+
+    safeSpecials = '!#$%&*+,-./:;<=>?@^_|~'
     iffySpecials = '"\'()[\\]^`{}'
     
-    def __init__(self, parent=None, title="", prompt=""):
+    def __init__(self, parent=None, title="", prompt="", pswd=None):
         super().__init__(parent)
 
         self.setWindowTitle(title)
         self.setAttribute(Qt.WidgetAttribute.WA_QuitOnClose, False)
 
+        self._pswdLength = 16
+        
+        self._buildUI(prompt, pswd)
+
+        if pswd is None:
+            self._generatePassword()
+
+    @classmethod
+    def getPassword(clazz, parent=None, title="", prompt=""):
+        dialog = PWVGeneratePswdDialog(parent, title, prompt)
+        status = dialog.exec()
+        if status:
+            return (dialog.pswdValue(), True)
+        else:
+            return ("", False)
+
+    def pswdValue(self):
+        return self._pswdLBL.text()
+
+    def _buildUI(self, prompt, pswd):
         promptLBL = QLabel(prompt)
 
-        self._pswdLBL = PWVPswdLabel("ABCDEF")
-        self._pswdLength = 16
+        if pswd is None:
+            self._pswdLBL = PWVPswdLabel()
+        else:
+            self._pswdLBL = PWVPswdLabel(pswd)
+
         self._pswdLenLBL =  QLabel(f"Length: {self._pswdLength}")
         pswdLenSLDR = QSlider()
         pswdLenSLDR.setOrientation(Qt.Orientation.Horizontal)
@@ -123,6 +149,7 @@ class PWVGeneratePswDialog(QDialog):
         safeSpecialsBTN.clicked.connect(self._safeSpecialCB)
         safeBox = QHBoxLayout()
         safeBox.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        safeBox.setSpacing(2)
         safeBox.addWidget(safeSpecialsBTN)
         self._safeChecks = []
         for schr in self.safeSpecials:
@@ -138,6 +165,7 @@ class PWVGeneratePswDialog(QDialog):
         iffySpecialsBTN.clicked.connect(self._iffySpecialCB)
         iffyBox = QHBoxLayout()
         iffyBox.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        iffyBox.setSpacing(4)
         iffyBox.addWidget(iffySpecialsBTN)
         self._iffyChecks = []
         for schr in self.iffySpecials:
@@ -160,11 +188,13 @@ class PWVGeneratePswDialog(QDialog):
         self.setStyleSheet("""
                 QPushButton#SpecialCharToggle {
                   border: 2px solid red;
-                  margin 0px;
+                  margin: 0px;
+                  padding: 3px;
                 }
                 QPushButton#SpecialCharToggle:checked {
                   border: 2px solid green;
-                  margin 0px;
+                  margin: 0px;
+                  padding: 3px;
                 }
             """)
             
@@ -186,25 +216,28 @@ class PWVGeneratePswDialog(QDialog):
         vbox.addWidget(buttonBox)
         self.setLayout(vbox)
 
-    def _cancelCB(self):
-        self.close()
-
     def _buttonCB(self, btn):
         if btn == self._copyBTN:
             clipboard = PWVApp.instance().clipboard()
             clipboard.setText(self._pswdLBL.text())
             return
         elif btn == self._genPswdBTN:
-            specials = ""
-            for scBTN in self._safeChecks:
-                if scBTN.isChecked():
-                    specials += scBTN.text()
-            for scBTN in self._iffyChecks:
-                if scBTN.isChecked():
-                    specials += scBTN.text()
+            self._generatePassword()
 
-            newPswd = GeneratePassword(self._pswdLength, specials)
-            self._pswdLBL.setText(newPswd)
+    def _generatePassword(self):
+        specials = ""
+        for scBTN in self._safeChecks:
+            if scBTN.isChecked():
+                specials += scBTN.text()
+        for scBTN in self._iffyChecks:
+            if scBTN.isChecked():
+                specials += scBTN.text()
+
+        newPswd = GeneratePassword(self._pswdLength, specials)
+        self._pswdLBL.setText(newPswd)
+
+    def _cancelCB(self):
+        self.close()
 
     def _okCB(self):
         self.accept()
@@ -222,7 +255,8 @@ class PWVGeneratePswDialog(QDialog):
         for scBTN in self._safeChecks:
             scBTN.setChecked(not scBTN.isChecked())
 
- 
+
+
 class PWVPswdDialog(QDialog):
 
     def __init__(self, parent=None, title="", prompt="", placeholder=""):
@@ -254,7 +288,7 @@ class PWVPswdDialog(QDialog):
     def _okCB(self):
         self.accept()
 
-    def getNewValue(self):
+    def pswdValue(self):
         return self._pswdLE.text()
 
     @classmethod
@@ -262,7 +296,7 @@ class PWVPswdDialog(QDialog):
         dialog = PWVPswdDialog(parent, title, prompt, placeholder)
         status = dialog.exec()
         if status:
-            return (dialog._pswdLE.text(), True)
+            return (dialog.pswdValue(), True)
         else:
             return ("", False)
 
@@ -334,7 +368,7 @@ if __name__ == "__main__":
         def _test5CB(self):
             title = "Generate Secure Password"
             prompt = "Choose generation options then click Generate"
-            dialog = PWVGeneratePswDialog(self, title, prompt)
+            dialog = PWVGeneratePswdDialog(self, title, prompt)
             status = dialog.exec()
             print(f"STATUS: {status}")
 

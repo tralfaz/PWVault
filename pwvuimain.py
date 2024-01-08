@@ -1,12 +1,6 @@
 from functools import partial
 import sys
 
-from pwvdoc    import PWVDoc
-from pwvdoc    import PWVKey
-from pwvuiapp  import PWVApp
-from pwvuicard import PWVCard
-from pwvuidocview import PWVDocView
-
 from PyQt6 import QtCore
 from PyQt6 import QtGui
 from PyQt6.QtGui import QAction
@@ -28,6 +22,13 @@ from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtWidgets import QScrollArea
 from PyQt6.QtWidgets import QVBoxLayout
 from PyQt6.QtWidgets import QWidget
+
+from pwvdoc       import PWVDoc
+from pwvdoc       import PWVKey
+from pwvuiapp     import PWVApp
+from pwvuicard    import PWVCard
+from pwvuidocview import PWVDocView
+from pwvuipswd    import PWVGeneratePswdDialog
 
     
 
@@ -56,7 +57,6 @@ class PWVMainWin(QMainWindow):
 
         self._buildMenus()
 
-        print(f"ARGV: {repr(sys.argv)}")
         if len(sys.argv) > 1:
             self._docView.openFile(sys.argv[1])
 
@@ -79,7 +79,6 @@ class PWVMainWin(QMainWindow):
         return self._docView.pwvDoc()
         
     def fileMenuNewVaultCB(self):
-        print("fileMenNewVault...")
 #        getSaveFileName(parent: QWidget = None, caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = '', initialFilter: Optional[str] = '', options: Option = QFileDialog.Options()) → Tuple[str, str]
         fnames = QFileDialog.getSaveFileName(self, 'New Vault File', '',
                                              "*.pwv *.pwvx")
@@ -122,7 +121,6 @@ class PWVMainWin(QMainWindow):
             self.updateWindowsMenu()
                 
     def fileMenuSaveAsCB(self):
-        print("fileMenuSaveAsCB")
 #       __init__(parent: QWidget = None, caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = '')
         dlgcap = "Save Current Vault As..."
         dialog = QFileDialog(self, caption=dlgcap,
@@ -167,16 +165,6 @@ class PWVMainWin(QMainWindow):
         docView.pwvDoc().setModified(False)
         docView.updateTitle()
 
-    def queryPassword(self):
-        text, ok = QInputDialog.getText(self, "Vault Password",
-                                        "Password:",
-                                        QLineEdit.EchoMode.Password)
-# default input
-#                                        QtCore.QDir.home().dirName())
-        if ok and text:
-            return text
-        return None
-
     def updateWindowsMenu(self):
         self._winMenu.clear()
         for dvx, docView in enumerate(self._docWins):
@@ -218,11 +206,9 @@ class PWVMainWin(QMainWindow):
         print(f"isActive: {self.isActive()}")
         
     def _appMenuQuitCB(self):
-        print("_appMenuQuitCB")
         PWVApp.instance().quit()
         
     def _buildMenus(self):
-        print("_buildMenus")
         fileMenu = self.menuBar().addMenu("&File")
 
         quitAct = QAction("E&xit", self)
@@ -258,7 +244,7 @@ class PWVMainWin(QMainWindow):
 #        fileMenu.addSeparator()
 #        fileMenu.addAction(self.exitAct)
 
-        self._encodeMenu = self.menuBar().addMenu("Ecoding")
+        self._encodeMenu = self.menuBar().addMenu("Encoding")
         
         self._decodeVaultAct = QAction("Decode Vault...", self)
         self._decodeVaultAct.setStatusTip("Decode current vault...")
@@ -270,6 +256,12 @@ class PWVMainWin(QMainWindow):
         self._encodeVaultAct.triggered.connect(self._encodeVaultCB)
         self._encodeMenu.addAction(self._encodeVaultAct)
 
+        self._genPswdAct = QAction("Generate Password...", self)
+        self._genPswdAct.setStatusTip("Generate secure password.")
+        self._genPswdAct.setShortcut(QKeySequence("Ctrl+g"))
+        self._genPswdAct.triggered.connect(self._generatePswdCB)
+        self._encodeMenu.addAction(self._genPswdAct)
+        
         self._winMenu = self.menuBar().addMenu("Windows")
 
     def _decodeVaultCB(self):
@@ -277,10 +269,9 @@ class PWVMainWin(QMainWindow):
         actWin.docView().decryptDoc()
 
     def _docScrollRangeCB(self, xr, yr):
-        print(f"_docScrollRangeCB({xr}, {yr})")
-        print("FORM GEOM: ", self._formLayout.contentsRect())
+#        print("FORM GEOM: ", self._formLayout.contentsRect())
         vbar = self._docScrollArea.verticalScrollBar()
-        print("VBAR MAX:", vbar.maximum())
+#        print("VBAR MAX:", vbar.maximum())
         if self._entryAdded:
             self._entryAdded = False
             vbar.setValue(vbar.maximum())
@@ -289,6 +280,13 @@ class PWVMainWin(QMainWindow):
         actWin = QApplication.instance().findActive()
         actWin.docView().encryptDoc()
 
+    def _generatePswdCB(self):
+        actWin = QApplication.instance().findActive()
+        title = "Generate Secure Password"
+        prompt = "Choose generation options then click Generate"
+
+        pswd, ok = PWVGeneratePswdDialog.getPassword(actWin, title, prompt)
+        
     def _saveWasDecodedDialog(self):
         title = "<H2>Was Encoded</H2>"
         msgBox = QMessageBox(QMessageBox.Icon.Warning,
@@ -317,7 +315,7 @@ class PWVMainWin(QMainWindow):
             return "Cancel"
 
     def _winMenuCB(self, docView):
-        print(f"_winMenuCB {docView}")
+#        print(f"_winMenuCB {docView}")
         docView.activateWindow()
         docView.raise_()
 

@@ -1,8 +1,3 @@
-from pwvdoc    import PWVDoc
-from pwvuipswd import PWVPswdDialog
-from pwvuicard import PWVCard
-from pwvuicard import PWVEncodedCard
-
 from PyQt6           import QtCore
 from PyQt6.QtWidgets import QCompleter
 from PyQt6.QtWidgets import QFormLayout
@@ -14,6 +9,13 @@ from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtWidgets import QScrollArea
 from PyQt6.QtWidgets import QVBoxLayout
 from PyQt6.QtWidgets import QWidget
+
+from pwvuiapp  import PWVApp
+from pwvdoc    import PWVDoc
+from pwvuipswd import PWVPswdDialog
+from pwvuicard import PWVCard
+from pwvuicard import PWVEncodedCard
+
 
 
 class PWVDocView(QWidget):
@@ -172,6 +174,12 @@ class PWVDocView(QWidget):
         self._searchLE.setPlaceholderText("Search Entries, Start with ~ for complete search")
         self._searchLE.textChanged.connect(self._searchCB)
 
+        actPos = QLineEdit.ActionPosition.TrailingPosition
+        searchIcon = PWVApp.instance().asset("search-icon-yellow")
+        self._searchACT = self._searchLE.addAction(searchIcon, actPos)
+#        self._searchACT.triggered.connect(self._searchActCB)
+#        self._searchACT.setEnabled(True)
+        
         # Adding Completer.
         self._searchMODL = QtCore.QStringListModel()
         self._searchMODL.setStringList(self._pwvDoc.searchCompletions())
@@ -225,6 +233,9 @@ class PWVDocView(QWidget):
         print(f"_getCardValues RC: {len(self._cards)}")
         for card in  self._cards:
             card.entryUpdate()
+
+    def _searchActCB(self):\
+        print("_searchActCB")
 
     def _searchCB(self, text):
         fullSearch = False
