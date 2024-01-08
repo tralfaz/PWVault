@@ -1,15 +1,18 @@
 import random
 import string
 
-from pwvuiapp import PWVApp
-
 from PyQt6.QtCore    import Qt
+#from PyQt6.QtCore   import QClipboard
 from PyQt6.QtWidgets import QDialog
 from PyQt6.QtWidgets import QDialogButtonBox
+from PyQt6.QtWidgets import QGroupBox
 from PyQt6.QtWidgets import QHBoxLayout
 from PyQt6.QtWidgets import QLabel
 from PyQt6.QtWidgets import QLineEdit
+from PyQt6.QtWidgets import QSlider
 from PyQt6.QtWidgets import QVBoxLayout
+
+from pwvuiapp import PWVApp
 
 
 def GeneratePassword(length=12, puncts=string.punctuation):
@@ -89,54 +92,135 @@ class PWVPswdLabel(PWVPswdLineEdit):
 
 class PWVGeneratePswDialog(QDialog):
 
+    safeSpecials = '!#$%&*+,-./:;<=>?@^_`|~'
+    iffySpecials = '"\'()[\\]^`{}'
+    
     def __init__(self, parent=None, title="", prompt=""):
         super().__init__(parent)
 
         self.setWindowTitle(title)
         self.setAttribute(Qt.WidgetAttribute.WA_QuitOnClose, False)
 
-
         promptLBL = QLabel(prompt)
 
         self._pswdLBL = PWVPswdLabel("ABCDEF")
+        self._pswdLength = 16
+        self._pswdLenLBL =  QLabel(f"Length: {self._pswdLength}")
+        pswdLenSLDR = QSlider()
+        pswdLenSLDR.setOrientation(Qt.Orientation.Horizontal)
+        pswdLenSLDR.setTickPosition(QSlider.TickPosition.TicksBothSides)
+        pswdLenSLDR.setTickInterval(1)
+        pswdLenSLDR.setRange(12, 24)
+        pswdLenSLDR.setValue(self._pswdLength)
+        pswdLenSLDR.valueChanged.connect(self._pswdLenChangedCB)
 
-        specialBox = QHBoxLayout()
-        for schr in string.punctuation:
+        pswdLenBox = QHBoxLayout()
+        pswdLenBox.addWidget(self._pswdLenLBL)
+        pswdLenBox.addWidget(pswdLenSLDR)
+
+        specialGRP = QGroupBox("Special Charcters")
+        safeSpecialsBTN = QPushButton("Safe Specials")
+        safeSpecialsBTN.clicked.connect(self._safeSpecialCB)
+        safeBox = QHBoxLayout()
+        safeBox.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        safeBox.addWidget(safeSpecialsBTN)
+        self._safeChecks = []
+        for schr in self.safeSpecials:
             scBTN = QPushButton(schr)
             scBTN.setObjectName("SpecialCharToggle")
             scBTN.setCheckable(True)
             scBTN.setChecked(True)
             scBTN.setFlat(True)
-#                QPushButton[accessibleName="SpecialCharToggle"] {
-            scBTN.setStyleSheet("""
+            safeBox.addWidget(scBTN)
+            self._safeChecks.append(scBTN)
+        
+        iffySpecialsBTN = QPushButton("Iffy Specials")
+        iffySpecialsBTN.clicked.connect(self._iffySpecialCB)
+        iffyBox = QHBoxLayout()
+        iffyBox.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        iffyBox.addWidget(iffySpecialsBTN)
+        self._iffyChecks = []
+        for schr in self.iffySpecials:
+            scBTN = QPushButton(schr)
+            scBTN.setObjectName("SpecialCharToggle")
+            scBTN.setCheckable(True)
+            scBTN.setChecked(False)
+            scBTN.setFlat(True)
+            iffyBox.addWidget(scBTN)
+            self._iffyChecks.append(scBTN)
+            
+        specialBox = QVBoxLayout()
+        specialBox.setContentsMargins(0, 0, 0, 0)
+        specialBox.addLayout(safeBox)
+        specialBox.addLayout(iffyBox)
+
+        specialGRP.setLayout(specialBox)
+
+        #  QPushButton[accessibleName="SpecialCharToggle"] {
+        self.setStyleSheet("""
                 QPushButton#SpecialCharToggle {
                   border: 2px solid red;
+                  margin 0px;
                 }
                 QPushButton#SpecialCharToggle:checked {
                   border: 2px solid green;
+                  margin 0px;
                 }
             """)
             
-            specialBox.addWidget(scBTN)
-
         buttonBox = QDialogButtonBox()
-        buttonBox.addButton("OK", QDialogButtonBox.ButtonRole.AcceptRole)
-        buttonBox.addButton("Cancel", QDialogButtonBox.ButtonRole.RejectRole)
+        btnRole = QDialogButtonBox.ButtonRole
+        buttonBox.addButton("OK", btnRole.AcceptRole)
+        self._genPswdBTN = buttonBox.addButton("Generate", btnRole.ApplyRole)
+        self._copyBTN = buttonBox.addButton("Copy", btnRole.ApplyRole)
+        buttonBox.addButton("Cancel", btnRole.RejectRole)
         buttonBox.accepted.connect(self._okCB)
+        buttonBox.clicked.connect(self._buttonCB)
         buttonBox.rejected.connect(self._cancelCB)
 
         vbox = QVBoxLayout()
         vbox.addWidget(promptLBL)
         vbox.addWidget(self._pswdLBL)
-        vbox.addLayout(specialBox)
+        vbox.addLayout(pswdLenBox)
+        vbox.addWidget(specialGRP)
         vbox.addWidget(buttonBox)
         self.setLayout(vbox)
 
     def _cancelCB(self):
         self.close()
 
+    def _buttonCB(self, btn):
+        if btn == self._copyBTN:
+            clipboard = PWVApp.instance().clipboard()
+            clipboard.setText(self._pswdLBL.text())
+            return
+        elif btn == self._genPswdBTN:
+            specials = ""
+            for scBTN in self._safeChecks:
+                if scBTN.isChecked():
+                    specials += scBTN.text()
+            for scBTN in self._iffyChecks:
+                if scBTN.isChecked():
+                    specials += scBTN.text()
+
+            newPswd = GeneratePassword(self._pswdLength, specials)
+            self._pswdLBL.setText(newPswd)
+
     def _okCB(self):
         self.accept()
+        
+    def _pswdLenChangedCB(self):
+        sldr = self.sender()
+        self._pswdLength = sldr.value()
+        self._pswdLenLBL.setText(f"Length: {self._pswdLength}")
+
+    def _iffySpecialCB(self):
+        for scBTN in self._iffyChecks:
+            scBTN.setChecked(not scBTN.isChecked())
+
+    def _safeSpecialCB(self):
+        for scBTN in self._safeChecks:
+            scBTN.setChecked(not scBTN.isChecked())
 
  
 class PWVPswdDialog(QDialog):
@@ -252,6 +336,7 @@ if __name__ == "__main__":
             prompt = "Choose generation options then click Generate"
             dialog = PWVGeneratePswDialog(self, title, prompt)
             status = dialog.exec()
+            print(f"STATUS: {status}")
 
     ## TEST            
     app = PWVApp()
