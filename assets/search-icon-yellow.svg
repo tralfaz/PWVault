@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="800px"
-   height="800px"
-   viewBox="0 0 24 24"
-   fill="none"
+   width="114.36951mm"
+   height="122.08868mm"
+   viewBox="0 0 114.36951 122.08868"
    version="1.1"
    id="svg1"
-   sodipodi:docname="search-icon-yellow.svg"
    inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   sodipodi:docname="search-icon-test.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs1" />
   <sodipodi:namedview
      id="namedview1"
      pagecolor="#ffffff"
@@ -25,20 +22,37 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="1.08125"
-     inkscape:cx="400"
-     inkscape:cy="473.98844"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.92737795"
+     inkscape:cx="343.44142"
+     inkscape:cy="500.87454"
      inkscape:window-width="1392"
      inkscape:window-height="1212"
-     inkscape:window-x="618"
-     inkscape:window-y="187"
+     inkscape:window-x="496"
+     inkscape:window-y="71"
      inkscape:window-maximized="0"
-     inkscape:current-layer="svg1" />
-  <path
-     fill-rule="evenodd"
-     clip-rule="evenodd"
-     d="M17.0392 15.6244C18.2714 14.084 19.0082 12.1301 19.0082 10.0041C19.0082 5.03127 14.9769 1 10.0041 1C5.03127 1 1 5.03127 1 10.0041C1 14.9769 5.03127 19.0082 10.0041 19.0082C12.1301 19.0082 14.084 18.2714 15.6244 17.0392L21.2921 22.707C21.6828 23.0977 22.3163 23.0977 22.707 22.707C23.0977 22.3163 23.0977 21.6828 22.707 21.2921L17.0392 15.6244ZM10.0041 17.0173C6.1308 17.0173 2.99087 13.8774 2.99087 10.0041C2.99087 6.1308 6.1308 2.99087 10.0041 2.99087C13.8774 2.99087 17.0173 6.1308 17.0173 10.0041C17.0173 13.8774 13.8774 17.0173 10.0041 17.0173Z"
-     fill="#0F0F0F"
-     id="path1"
-     style="fill:#ffff00" />
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-14.265129,-15.976944)">
+    <ellipse
+       style="fill:none;stroke:#ffff00;stroke-width:11.3908;stroke-dasharray:none"
+       id="path1"
+       cx="57.631123"
+       cy="60.48415"
+       rx="36.296722"
+       ry="37.15263" />
+    <rect
+       style="fill:#ffff00;stroke-width:0.250788"
+       id="rect1"
+       width="60.493519"
+       height="12.838555"
+       x="119.30965"
+       y="9.424119"
+       transform="matrix(0.74235477,0.67000701,-0.66888463,0.74336623,0,0)" />
+  </g>
 </svg>

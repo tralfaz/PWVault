@@ -1,5 +1,6 @@
 from PyQt6           import QtCore
 from PyQt6.QtWidgets import QCompleter
+from PyQt6.QtWidgets import QFileDialog
 from PyQt6.QtWidgets import QFormLayout
 from PyQt6.QtWidgets import QGroupBox
 from PyQt6.QtWidgets import QInputDialog
@@ -140,6 +141,28 @@ class PWVDocView(QWidget):
         self.updateEntriesCounter()
         self.updateTitle()
 
+
+    def saveDocument(self):
+        docPath = self.pwvDoc().path()
+        if not docPath:
+            dlgcap = "Save current vault"
+            docPath,fset = QFileDialog.getSaveFileName(self, caption=dlgcap)
+            if not docPath:
+                # canceled
+                return "CANCELED"
+
+        if not docPath.endswith(".pwv") and not docPath.endswith(".pwvx"):
+            docPath += ".pwv"
+
+        if self.pwvDoc().wasDecoded():
+            self.encryptDoc(False)
+    
+        self.saveFile(docPath)
+        self.pwvDoc().setModified(False)
+        self.updateTitle()
+        return "SAVED"
+############
+        
     def saveFile(self, path=None):
 #        self._getCardValues()
         self._pwvDoc.saveDocAs(path)
@@ -177,7 +200,7 @@ class PWVDocView(QWidget):
         actPos = QLineEdit.ActionPosition.TrailingPosition
         searchIcon = PWVApp.instance().asset("search-icon-yellow")
         self._searchACT = self._searchLE.addAction(searchIcon, actPos)
-#        self._searchACT.triggered.connect(self._searchActCB)
+        self._searchACT.triggered.connect(self._searchActCB)
 #        self._searchACT.setEnabled(True)
         
         # Adding Completer.
@@ -234,7 +257,7 @@ class PWVDocView(QWidget):
         for card in  self._cards:
             card.entryUpdate()
 
-    def _searchActCB(self):\
+    def _searchActCB(self):
         print("_searchActCB")
 
     def _searchCB(self, text):

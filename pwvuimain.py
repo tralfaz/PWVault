@@ -206,6 +206,25 @@ class PWVMainWin(QMainWindow):
         print(f"isActive: {self.isActive()}")
         
     def _appMenuQuitCB(self):
+        for docw in self._docWins:
+            if docw.docView().pwvDoc().modified():
+                fname = docw.docView().pwvDoc().fileName()
+                msgBox = QMessageBox()
+                msgBox.setIcon(QMessageBox.Icon.Question)
+                msgBox.setText(f"The document {fname} has been modified.")
+                msgBox.setInformativeText("Do you want to save your changes?")
+                stdbtn = QMessageBox.StandardButton
+                msgBox.setStandardButtons(stdbtn.Save | stdbtn.Discard | stdbtn.Cancel)
+                msgBox.setDefaultButton(stdbtn.Save)
+                status = msgBox.exec()
+                if status == stdbtn.Save:
+                    docStatus = docw.docView().saveDocument()
+                    if docStatus == "CANCELED":
+                        return
+                elif status == stdbtn.Discard:
+                    pass
+                elif stdbtn.Cancel:
+                    return
         PWVApp.instance().quit()
         
     def _buildMenus(self):
