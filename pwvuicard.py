@@ -242,7 +242,7 @@ class PWVCard(QFrame):
     # EVENTS
     def mousePressEvent(self, qMouseEvt):
         btn, pos = qMouseEvt.button(), qMouseEvt.position()
-        print(f"mousePressEvent: {btn} ({pos.x()}%s,{pos.y()})")
+        print(f"mousePressEvent: {btn} ({pos.x()},{pos.y()})")
         if self.property("selected") == "false":
             self.setProperty("selected", "true")
         else:
