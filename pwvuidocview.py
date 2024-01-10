@@ -37,6 +37,8 @@ class PWVDocView(QWidget):
         self._entryAdded = False
 
         self._cards= []
+        self._lastCardSelected = None
+        
         self._buildDocWindow()
 
     def addEntry(self):
@@ -104,6 +106,41 @@ class PWVDocView(QWidget):
             return text
         return None
     
+    def selectAdd(self, cardClicked):
+        cardClicked.setSelected(not cardClicked.selected())
+        if cardClicked.selected():
+            self._lastCardSelected = cardClicked
+        
+    def selectExtend(self, cardClicked):
+        if self._lastCardSelected:
+            print(f"LAST CLICKED: {self._lastCardSelected.entryID()}")
+        else:
+            print("LAST CLICKED: NONE")
+
+        inExtend = False
+        for card in self._cards:
+            print(f"CARD: {card.entryID()}")
+            if inExtend:
+                card.setSelected(True)
+                if card is cardClicked or card is self._lastCardSelected:
+                    inExtend =  False
+                    print("OUT EXTEND")
+            else:
+                if card is cardClicked or card is self._lastCardSelected:
+                    card.setSelected(True)
+                    inExtend =  True
+                    print("IN EXTEND")
+
+        self._lastCardSelected = cardClicked
+
+    def selectOne(self, cardClicked):
+        for card in self._cards:
+            if card is cardClicked:
+                card.setSelected(not card.selected())
+                self._lastCardSelected = card if card.selected() else None
+            else:
+                card.setSelected(False)
+        
     def updateEntriesCounter(self):
         nents = 0
         if self._pwvDoc.entries():
@@ -210,12 +247,14 @@ class PWVDocView(QWidget):
                 self._cards.append(card)
                 self._formLayout.addRow(card)
             self._searchMODL.setStringList(self._pwvDoc.searchCompletions())
+            self._addEntryBTN.setVisible(True)
 
         else:
             self._searchLE.setVisible(False)
             card = PWVEncodedCard()
 #            self._cards.append(card)
             self._formLayout.addRow(card)
+            self._addEntryBTN.setVisible(False)
 
         self.updateEntriesCounter()
         self.updateTitle()
@@ -273,7 +312,7 @@ class PWVDocView(QWidget):
 
         self._addEntryBTN = QPushButton("+")
         self._addEntryBTN.clicked.connect(self.addEntry)
-
+        
         vbox = QVBoxLayout()
         vbox.addWidget(self._searchLE)
         vbox.addWidget(self._entriesGRP)

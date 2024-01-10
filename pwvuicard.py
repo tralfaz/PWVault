@@ -195,6 +195,12 @@ class PWVCard(QFrame):
         
         self.setLayout(vbox)
 
+    def entry(self):
+        return self._entry
+
+    def entryID(self):
+        return self._entry.get(PWVKey.ID)
+
     def searchMatch(self, text, fullSearch=False):
         if not text:
             return True
@@ -251,15 +257,20 @@ class PWVCard(QFrame):
 
     # EVENTS
     def mousePressEvent(self, qMouseEvt):
-        btn, pos = qMouseEvt.button(), qMouseEvt.position()
-        print(f"mousePressEvent: {btn} ({pos.x()},{pos.y()})")
-        if self.property("selected") == "false":
-            self.setProperty("selected", "true")
-        else:
-            self.setProperty("selected", "false")
-        self.style().unpolish(self)
-        self.style().polish(self)
-        self.update()
+        mbtns = QtCore.Qt.MouseButton
+        mevbtn = qMouseEvt.button()
+        if mevbtn == mbtns.LeftButton:
+            mmods = QtCore.Qt.KeyboardModifier
+            mevmod = qMouseEvt.modifiers()
+            if mevmod == mmods.NoModifier:
+                ## New/Unselect
+                self.window().docView().selectOne(self)
+            elif mevmod == mmods.ControlModifier:
+                # MacOS CMD, Add to selection
+                self.window().docView().selectAdd(self)
+            elif mevmod == mmods.ShiftModifier:
+                # Start or extend selection
+                self.window().docView().selectExtend(self)
 
     def _expandCB(self):
         if self._expanded:
