@@ -79,10 +79,8 @@ class PWVMainWin(QMainWindow):
         return self._docView.pwvDoc()
         
     def fileMenuNewVaultCB(self):
-#        getSaveFileName(parent: QWidget = None, caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = '', initialFilter: Optional[str] = '', options: Option = QFileDialog.Options()) → Tuple[str, str]
         fnames = QFileDialog.getSaveFileName(self, 'New Vault File', '',
                                              "*.pwv *.pwvx")
-        print(f"FNAMES: {fnames}")
         if fnames:
             docView = PWVDocView()
             docView.setVisible(True)
@@ -136,12 +134,9 @@ class PWVMainWin(QMainWindow):
                 actWin.docView().pwvDoc().saveDocAs(fname)
                
     def fileMenuSaveCB(self):
-        print("fileMenuSaveCB")
         actWin = QApplication.instance().findActive()
         docView = actWin.docView()
-        print("DOCVIEW: ", docView)
         docPath = docView.pwvDoc().path()
-        print(f"WIN DOC PATH {docPath}")
                 
         if not docPath:
             dlgcap = "Save current vault"
@@ -263,8 +258,21 @@ class PWVMainWin(QMainWindow):
 #        fileMenu.addSeparator()
 #        fileMenu.addAction(self.exitAct)
 
+        # Arrange
+        self._arrangeMenu = self.menuBar().addMenu("Arrange")
+        self._arrangeUpAct = QAction("Move up", self)
+        self._arrangeUpAct.setStatusTip("Move selected up 1 position.")
+        self._arrangeUpAct.setShortcut(QKeySequence("Ctrl+Up"))
+        self._arrangeUpAct.triggered.connect(self._menuArrangeUpCB)
+        self._arrangeMenu.addAction(self._arrangeUpAct)
+        self._arrangeDownAct = QAction("Move up", self)
+        self._arrangeDownAct.setStatusTip("Move selected up 1 position.")
+        self._arrangeDownAct.setShortcut(QKeySequence("Ctrl+Down"))
+        self._arrangeDownAct.triggered.connect(self._menuArrangeDownCB)
+        self._arrangeMenu.addAction(self._arrangeDownAct)
+
+        # Encode
         self._encodeMenu = self.menuBar().addMenu("Encoding")
-        
         self._decodeVaultAct = QAction("Decode Vault...", self)
         self._decodeVaultAct.setStatusTip("Decode current vault...")
         self._decodeVaultAct.triggered.connect(self._decodeVaultCB)
@@ -305,7 +313,15 @@ class PWVMainWin(QMainWindow):
         prompt = "Choose generation options then click Generate"
 
         pswd, ok = PWVGeneratePswdDialog.getPassword(actWin, title, prompt)
-        
+
+    def _menuArrangeDownCB(self):
+        actWin = QApplication.instance().findActive()
+        actWin.docView().arrangeDown()
+
+    def _menuArrangeUpCB(self):
+        actWin = QApplication.instance().findActive()
+        actWin.docView().arrangeUp()
+
     def _saveWasDecodedDialog(self):
         title = "<H2>Was Encoded</H2>"
         msgBox = QMessageBox(QMessageBox.Icon.Warning,

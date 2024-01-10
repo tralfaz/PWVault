@@ -145,6 +145,11 @@ class PWVDoc(object):
     def modified(self):
         return self._modified
 
+    def moveEntry(self, fromIndex, toIndex):
+        entList = self.entries()
+        ent = entList.pop(fromIndex)
+        entList.insert(toIndex, ent)
+
     def newEntry(self):
         nents = len(self.entries())
         entry = {

@@ -53,6 +53,42 @@ class PWVDocView(QWidget):
         self.updateEntriesCounter()
         self.updateTitle()
 
+    def arrangeDown(self):
+        selectedCards = []
+        cardCount = len(self._cards)
+        cdx = cardCount-1
+        for card in reversed(self._cards):
+            if card.selected():
+                if cdx < cardCount-1:
+                    self.pwvDoc().moveEntry(cdx, cdx+1)
+                    selectedCards.append(cdx+1)
+            cdx -= 1
+        if not selectedCards:
+            return
+        self._clearCards()
+        self._buildCards()
+        for cdx in selectedCards:
+            self._cards[cdx].setSelected(True)
+        self.pwvDoc().setModified(True)
+        self.updateTitle()
+
+    def arrangeUp(self):
+        selectedCards = []
+        for cdx, card in enumerate(self._cards):
+            if card.selected():
+                print(f"arrangeUp: SEL {cdx}")
+                if cdx > 0:
+                    self.pwvDoc().moveEntry(cdx, cdx-1)
+                    selectedCards.append(cdx-1)
+        if not selectedCards:
+            return
+        self._clearCards()
+        self._buildCards()
+        for cdx in selectedCards:
+            self._cards[cdx].setSelected(True)
+        self.pwvDoc().setModified(True)
+        self.updateTitle()
+
     def docView(self):
         return self
 
@@ -104,7 +140,6 @@ class PWVDocView(QWidget):
             return
     
         self._clearCards()
-
         self._buildCards()
         self.updateTitle()
         

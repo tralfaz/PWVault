@@ -1,11 +1,6 @@
 from functools import partial
 import sys
  
-from pwvdoc import PWVKey
-from pwvuiapp import PWVApp
-from pwvuipswd import PWVPswdLabel
-from pwvuipswd import PWVPswdLineEdit
-
 from PyQt6 import QtCore
 from PyQt6 import QtGui
 from PyQt6.QtWidgets import QApplication
@@ -20,6 +15,12 @@ from PyQt6.QtWidgets import QScrollArea
 from PyQt6.QtWidgets import QTextEdit
 from PyQt6.QtWidgets import QVBoxLayout
 from PyQt6.QtWidgets import QWidget
+
+from pwvdoc    import PWVKey
+from pwvuiapp  import PWVApp
+from pwvuipswd import PWVPswdLabel
+from pwvuipswd import PWVPswdLineEdit
+
 
 
 class PWVCardField(QWidget):
@@ -132,7 +133,7 @@ class PWVCardField(QWidget):
         #MOVE
         self.window().docView().pwvDoc().setModified(True)
         self.window().docView().updateTitle()
-
+# END PWVCardField
 
 
 class PWVCard(QFrame):
@@ -203,7 +204,7 @@ class PWVCard(QFrame):
         if fullSearch and text in self._entry.get(PWVKey.NOTES, "").lower():
             return True
         return False
-
+    
     def selected(self):
         return self.property("selected") == "true"
 
@@ -224,7 +225,16 @@ class PWVCard(QFrame):
         self._entry[PWVKey.USER]  = self._userCF.plainText()
         self._entry[PWVKey.PSWD]  = self._pswdCF.plainText()
         self._entry[PWVKey.NOTES] = self._notesTXT.toPlainText()
-        
+
+    def setSelected(self, state):
+        if state:
+            self.setProperty("selected", "true")
+        else:
+            self.setProperty("selected", "false")
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
+
 #    def pswdCopyCB(self):
 #        clipb = QApplication.clipboard()
 #        clipb.setText(self._entry.get(PWVKey.PSWD, ""))
