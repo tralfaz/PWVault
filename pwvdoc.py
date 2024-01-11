@@ -59,14 +59,6 @@ class PWVDoc(object):
             docEnts.append(entries)
         self.setModified(True)
 
-    def searchCompletions(self, fullSearch=False):
-        comps = set([])
-        if self.encoded():
-            return comps
-        for entry in self.entries():
-            comps.update(entry.get(PWVKey.ID,"").split())
-        return comps
-        
     def decrypt(self, pswd):
         if not self.isEncrypted():
             return ("ERROR", "Document not encrypted")
@@ -173,11 +165,27 @@ class PWVDoc(object):
     def path(self):
         return self._path
 
+    def popEntry(self, popIndex):
+        entList = self.entries()
+        if not entList:
+            return None
+        if popIndex not in range(len(entList)):
+            return None
+        return entList.pop(popIndex)
+
     def saveDocAs(self, path):
         with open(path, "w") as docFP:
             json.dump(self._docObj, docFP, indent=4)
             self._path = path
-            
+
+    def searchCompletions(self, fullSearch=False):
+        comps = set([])
+        if self.encoded():
+            return comps
+        for entry in self.entries():
+            comps.update(entry.get(PWVKey.ID,"").split())
+        return comps
+        
     def setDocObject(self, docObj):
         self._docObj = docObj
 

@@ -43,6 +43,9 @@ class PWVCardField(QWidget):
         elif url:
             self.setURL(val)
             self._valLBL.setOpenExternalLinks(url)
+            self._valLBL.setWordWrap(True)
+            self._valLBL.setMinimumWidth(400)
+            self._valLBL.setMaximumWidth(600)
         if pswd:
             self._valLE  = PWVPswdLineEdit()
         else:
@@ -324,7 +327,6 @@ class PWVEncodedCard(QFrame):
         self._setStyle()
         
     def _decodeCB(self):
-        print("PWVEncodedCard._decodeCB")
         mainWin = QApplication.instance().mainWin()
         mainWin.decodeVault()
 
