@@ -180,6 +180,19 @@ class PWVDocView(QWidget):
         self._buildCards()
         self.updateTitle()
         
+    def deleteSelection(self): 
+        modified = False
+        for cdx, card in enumerate(self._cards):
+            if card.selected():
+                self._cards.pop(cdx)
+                entry = self.pwvDoc().popEntry(cdx)
+                self._formLayout.removeRow(cdx) 
+                modified = True
+        if modified:
+            self.pwvDoc().setModified(True)
+            self.updateTitle()
+            self.updateEntriesCounter()
+                
     def encryptDoc(self, recode=True):
         #msgBox = QMessageBox.information(self, "FOO", "BAR")
         if self.pwvDoc().encoded():
@@ -319,21 +332,6 @@ class PWVDocView(QWidget):
         vbox.addWidget(self._addEntryBTN)
         self.setLayout(vbox)
 
-    def _deleteSelection(self): 
-        modified = False
-        for cdx, card in enumerate(self._cards):
-            if card.selected():
-                print(f"DELETE {card.entryID()} at {cdx}")
-                self._cards.pop(cdx)
-                entry = self.pwvDoc().popEntry(cdx)
-                print(entry)
-                self._formLayout.removeRow(cdx) 
-                modified = True
-        if modified:
-            self.pwvDoc().setModified(True)
-            self.updateTitle()
-            self.updateEntriesCounter()
-                
     def _docScrollRangeCB(self, xr, yr):
         vbar = self._docScrollArea.verticalScrollBar()
         if self._entryAdded:
@@ -361,12 +359,12 @@ class PWVDocView(QWidget):
             card.zoom(pointDelta)
 
     # BEGIN EVENT HANDLERS
-    def keyPressEvent(self, qev):
-        #print(f"PWVDocView.keyPressEvent: KEY:{qev.key()} TEXT:{repr(qev.text())}")
-        #print(f"NVK: {qev.nativeVirtualKey()}")
-#        if qev.key() == QtCore.Qt.Key.Key_Delete:
-#            print("DELETE")
-        if qev.key() == QtCore.Qt.Key.Key_Backspace:
-            self._deleteSelection()
+#    def keyPressEvent(self, qev):
+#        #print(f"PWVDocView.keyPressEvent: KEY:{qev.key()} TEXT:{repr(qev.text())}")
+#        #print(f"NVK: {qev.nativeVirtualKey()}")
+##        if qev.key() == QtCore.Qt.Key.Key_Delete:
+##            print("DELETE")
+#        if qev.key() == QtCore.Qt.Key.Key_Backspace:
+#            self.deleteSelection()
     # END EVENT HANDLERS
         

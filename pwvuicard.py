@@ -126,7 +126,6 @@ class PWVCardField(QWidget):
         clipb.setText(self._valPlain)
     
     def _editCB(self):
-        print("PWVFieldEdit._editCB")
         self._valLBL.setVisible(False)
         self._valLE.setText(self._valPlain)
         self._valLE.setVisible(True)

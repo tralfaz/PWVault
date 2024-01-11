@@ -225,23 +225,31 @@ class PWVMainWin(QMainWindow):
         openAct.setStatusTip("Open an existing file")
         openAct.triggered.connect(self.fileMenuOpenCB)
         fileMenu.addAction(openAct)
-
         saveAct = QAction("Save...", self)
         saveAct.setShortcuts(QKeySequence.StandardKey.Save)
         saveAct.setStatusTip("Save curren vault")
         saveAct.triggered.connect(self.fileMenuSaveCB)
         fileMenu.addAction(saveAct)
-
         saveAsAct = QAction("Save As...", self)
         saveAsAct.setShortcuts(QKeySequence.StandardKey.SaveAs)
         saveAsAct.setStatusTip("Save current vault as...")
         saveAsAct.triggered.connect(self.fileMenuSaveAsCB)
         fileMenu.addAction(saveAsAct)
 
-#        fileMenu.addSeparator()
-#        fileMenu.addAction(self.exitAct)
+        # Edit menu
+        editMenu = self.menuBar().addMenu("Edit")
+        cutAct = QAction("Cut", self)
+        cutAct.setShortcuts(QKeySequence.StandardKey.Cut)
+        cutAct.setStatusTip("Cut selected entries")
+        cutAct.triggered.connect(self._menuEditCutCB)
+        editMenu.addAction(cutAct)
+        undoAct = QAction("Cut", self)
+        undoAct.setShortcuts(QKeySequence.StandardKey.Undo)
+        undoAct.setStatusTip("Undo prior changes")
+        undoAct.triggered.connect(self._menuEditUndoCB)
+        editMenu.addAction(undoAct)
 
-        # Arrange
+        # Arrange menu
         self._arrangeMenu = self.menuBar().addMenu("Arrange")
         self._arrangeUpAct = QAction("Move up", self)
         self._arrangeUpAct.setStatusTip("Move selected up 1 position.")
@@ -254,7 +262,7 @@ class PWVMainWin(QMainWindow):
         self._arrangeDownAct.triggered.connect(self._menuArrangeDownCB)
         self._arrangeMenu.addAction(self._arrangeDownAct)
 
-        # Encode
+        # Encode menu
         self._encodeMenu = self.menuBar().addMenu("Encoding")
         self._decodeVaultAct = QAction("Decode Vault...", self)
         self._decodeVaultAct.setStatusTip("Decode current vault...")
@@ -318,6 +326,21 @@ class PWVMainWin(QMainWindow):
     def _menuArrangeUpCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView().arrangeUp()
+
+    def _menuEditCutCB(self):
+        actWin = QApplication.instance().findActive()
+        actWin.docView().deleteSelection()
+
+    def _menuEditUndoCB(self):
+        actWin = QApplication.instance().findActive()
+        title = "<H2>Not Working Yet!</H2>"
+        msgBox = QMessageBox(QMessageBox.Icon.Warning,
+                             title,
+                             title + "<P>That function is not yet working.</P>",
+                             QMessageBox.StandardButton.Ok, actWin)
+        info = """That feature is not implement yet.  Bummer!"""
+        msgBox.setInformativeText(info)
+        msgBox.exec()
 
     def _menuFileNewCB(self):
         docView = PWVDocView()
