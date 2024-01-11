@@ -78,21 +78,6 @@ class PWVMainWin(QMainWindow):
         """Return the PWVDoc object belonging to the PWVDocView"""
         return self._docView.pwvDoc()
         
-    def fileMenuNewVaultCB(self):
-        fnames = QFileDialog.getSaveFileName(self, 'New Vault File', '',
-                                             "*.pwv *.pwvx")
-        if fnames:
-            docView = PWVDocView()
-            docView.setVisible(True)
-            self.addDocView(docView)
-#        dialog = QFileDialog(self)
-#        #dialog.setFileMode(QFileDialog.AnyFile)
-#        dialog.setNameFilter(self.tr("PWVDoc (*.pwv *.pwvx)"))
-#        dialog.setViewMode(QFileDialog.ViewMode.Detail)
-#        if dialog.exec():
-#            fileNames = dialog.selectedFiles()
-#            print(f"FNAMES: {repr(fileNames)}")
-
     def fileMenuOpenCB(self):
         dlgcap = "Open Vault..."
         dialog = QFileDialog(self, caption=dlgcap,
@@ -223,20 +208,18 @@ class PWVMainWin(QMainWindow):
         PWVApp.instance().quit()
         
     def _buildMenus(self):
+        # File menu
         fileMenu = self.menuBar().addMenu("&File")
-
         quitAct = QAction("E&xit", self)
         quitAct.setShortcuts(QKeySequence.StandardKey.Quit)
         quitAct.setStatusTip("Quit PWVault")
         quitAct.triggered.connect(self._appMenuQuitCB)
         fileMenu.addAction(quitAct)
-        
         newAct = QAction("&New...", self)
         newAct.setShortcuts(QKeySequence.StandardKey.New)
         newAct.setStatusTip("Create a new Password Vault Document...")
-        newAct.triggered.connect(self.fileMenuNewVaultCB)
+        newAct.triggered.connect(self._menuFileNewCB)
         fileMenu.addAction(newAct)
-        
         openAct = QAction("&Open...", self)
         openAct.setShortcuts(QKeySequence.StandardKey.Open)
         openAct.setStatusTip("Open an existing file")
@@ -335,6 +318,11 @@ class PWVMainWin(QMainWindow):
     def _menuArrangeUpCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView().arrangeUp()
+
+    def _menuFileNewCB(self):
+        docView = PWVDocView()
+        docView.setVisible(True)
+        self.addDocView(docView)
 
     def _menuZoomMinusCB(self):
         actWin = QApplication.instance().findActive()

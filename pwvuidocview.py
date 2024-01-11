@@ -199,6 +199,7 @@ class PWVDocView(QWidget):
 
 #        self._getCardValues()
         self._pwvDoc.encrypt(pswd1)
+        self._pwvDoc.setModified(True)
         pswd1 = pswd2 = None
         
         self._clearCards()
@@ -359,7 +360,7 @@ class PWVDocView(QWidget):
         for card in self._cards:
             card.zoom(pointDelta)
 
-    # BEGIN EVENT HANDLERSS
+    # BEGIN EVENT HANDLERS
     def keyPressEvent(self, qev):
         #print(f"PWVDocView.keyPressEvent: KEY:{qev.key()} TEXT:{repr(qev.text())}")
         #print(f"NVK: {qev.nativeVirtualKey()}")
