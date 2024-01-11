@@ -65,8 +65,6 @@ def DecryptStrToStr(encKey, srcStr):
     try:
         encBuf = cypher.decrypt(srcBuf)
     except InvalidToken as decx:
-        print("DECX: ", decx)
-        print("DECX: ", repr(dir(decx)))
         raise PWVCryptoExc("Bad decryption key", PWVCryptoExc.INVALID_TOKEN)
     return encBuf.decode("utf-8")
 

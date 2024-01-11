@@ -237,16 +237,6 @@ class PWVDocView(QWidget):
     def saveFile(self, path=None):
         self._pwvDoc.saveDocAs(path)
 
-    # BEGIN EVENT HANDLERSS
-    def keyPressEvent(self, qev):
-        #print(f"PWVDocView.keyPressEvent: KEY:{qev.key()} TEXT:{repr(qev.text())}")
-        #print(f"NVK: {qev.nativeVirtualKey()}")
-#        if qev.key() == QtCore.Qt.Key.Key_Delete:
-#            print("DELETE")
-        if qev.key() == QtCore.Qt.Key.Key_Backspace:
-            self._deleteSelection()
-    # END EVENT HANDLERS
-        
     def _buildCards(self):
         if not self._pwvDoc.encoded():
             self._searchLE.setVisible(True)
@@ -365,3 +355,17 @@ class PWVDocView(QWidget):
         for card in self._cards:
             card.setVisible(card.searchMatch(text, fullSearch))
 
+    def _zoomCards(self, pointDelta):
+        for card in self._cards:
+            card.zoom(pointDelta)
+
+    # BEGIN EVENT HANDLERSS
+    def keyPressEvent(self, qev):
+        #print(f"PWVDocView.keyPressEvent: KEY:{qev.key()} TEXT:{repr(qev.text())}")
+        #print(f"NVK: {qev.nativeVirtualKey()}")
+#        if qev.key() == QtCore.Qt.Key.Key_Delete:
+#            print("DELETE")
+        if qev.key() == QtCore.Qt.Key.Key_Backspace:
+            self._deleteSelection()
+    # END EVENT HANDLERS
+        

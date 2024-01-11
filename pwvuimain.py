@@ -275,20 +275,34 @@ class PWVMainWin(QMainWindow):
         self._encodeMenu = self.menuBar().addMenu("Encoding")
         self._decodeVaultAct = QAction("Decode Vault...", self)
         self._decodeVaultAct.setStatusTip("Decode current vault...")
+        self._decodeVaultAct.setShortcut(QKeySequence("Ctrl+="))
         self._decodeVaultAct.triggered.connect(self._decodeVaultCB)
         self._encodeMenu.addAction(self._decodeVaultAct)
-
         self._encodeVaultAct = QAction("Encode Vault...", self)
         self._encodeVaultAct.setStatusTip("Encode current vault...")
+        self._encodeVaultAct.setShortcut(QKeySequence("Ctrl+~"))
         self._encodeVaultAct.triggered.connect(self._encodeVaultCB)
         self._encodeMenu.addAction(self._encodeVaultAct)
-
         self._genPswdAct = QAction("Generate Password...", self)
         self._genPswdAct.setStatusTip("Generate secure password.")
         self._genPswdAct.setShortcut(QKeySequence("Ctrl+g"))
         self._genPswdAct.triggered.connect(self._generatePswdCB)
         self._encodeMenu.addAction(self._genPswdAct)
-        
+
+        # View menu
+        self._viewMenu = self.menuBar().addMenu("View")
+        self._zoomPlusAct = QAction("Zoom In", self)
+        self._zoomPlusAct.setStatusTip("Increase Font Size")
+        self._zoomPlusAct.setShortcut(QKeySequence("Ctrl++"))
+        self._zoomPlusAct.triggered.connect(self._menuZoomPlusCB)
+        self._viewMenu.addAction(self._zoomPlusAct)
+        self._zoomMinusAct = QAction("Zoom Out", self)
+        self._zoomMinusAct.setStatusTip("Decrease Font Size")
+        self._zoomMinusAct.setShortcut(QKeySequence("Ctrl+-"))
+        self._zoomMinusAct.triggered.connect(self._menuZoomMinusCB)
+        self._viewMenu.addAction(self._zoomMinusAct)
+
+        # Windows menu
         self._winMenu = self.menuBar().addMenu("Windows")
 
     def _decodeVaultCB(self):
@@ -321,6 +335,14 @@ class PWVMainWin(QMainWindow):
     def _menuArrangeUpCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView().arrangeUp()
+
+    def _menuZoomMinusCB(self):
+        actWin = QApplication.instance().findActive()
+        actWin.docView()._zoomCards(-1)
+
+    def _menuZoomPlusCB(self):
+        actWin = QApplication.instance().findActive()
+        actWin.docView()._zoomCards(1)
 
     def _saveWasDecodedDialog(self):
         title = "<H2>Was Encoded</H2>"

@@ -110,6 +110,17 @@ class PWVCardField(QWidget):
     def urlText(self):
         return f'<A HREF="{self._plainText}">{self._plainText}</A>'
 
+    def zoom(self, pointDelta):
+        font = self._idLBL.font()
+        font.setPointSize(font.pointSize()+pointDelta)
+        self._idLBL.setFont(font)
+        font = self._valLBL.font()
+        font.setPointSize(font.pointSize()+pointDelta)
+        self._valLBL.setFont(font)
+        font = self._valLE.font()
+        font.setPointSize(font.pointSize()+pointDelta)
+        self._valLE.setFont(font)
+
     def _copyCB(self):
         clipb = QApplication.clipboard()
         clipb.setText(self._valPlain)
@@ -243,6 +254,19 @@ class PWVCard(QFrame):
         self.style().unpolish(self)
         self.style().polish(self)
         self.update()
+
+    def zoom(self, pointDelta):
+        self._idCF.zoom(pointDelta)
+        self._urlCF.zoom(pointDelta)
+        self._userCF.zoom(pointDelta)
+        self._pswdCF.zoom(pointDelta)
+        
+        font = self._notesGRP.font()
+        font.setPointSize(font.pointSize()+pointDelta)
+        self._notesGRP.setFont(font)        
+        font = self._notesTXT.font()
+        font.setPointSize(font.pointSize()+pointDelta)
+        self._notesTXT.setFont(font)        
 
 #    def pswdCopyCB(self):
 #        clipb = QApplication.clipboard()
