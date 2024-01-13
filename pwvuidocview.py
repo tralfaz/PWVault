@@ -314,13 +314,32 @@ class PWVDocView(QWidget):
             
         self._entriesGRP = QGroupBox(f"Entries: {nents}")
  
-        cards = QWidget()
-        cards.setLayout(self._formLayout)
+        cardsForm = QWidget()
+        cardsForm.setLayout(self._formLayout)
         
         self._docScrollArea = scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.verticalScrollBar().rangeChanged.connect(self._docScrollRangeCB)
-        scroll.setWidget(cards)
+        scroll.setWidget(cardsForm)
+        cardsForm.setStyleSheet("""
+          PWVCard[selected="false"] {
+            background-color: black;
+            border: 5px solid gray;
+            border-radius: 0px;
+          }
+          PWVCard[selected="true"] {
+            background-color: rgba(100,100,100, 0.4);
+            border: 5px solid yellow;
+            border-radius: 10px;
+          }
+
+          PWVCard QGroupBox {
+            padding: 3 0px;
+          }
+          PWVCard QGroupBox::title {
+           subcontrol-position: top center;
+           padding-bottom: 3px;
+         } """)
 
         self._addEntryBTN = QPushButton("+")
         self._addEntryBTN.clicked.connect(self.addEntry)
@@ -359,6 +378,25 @@ class PWVDocView(QWidget):
             card.zoom(pointDelta)
 
     # BEGIN EVENT HANDLERS
+
+### BEGIN EVENT HANDLERS
+
+    def closeEvent(self, qev):
+        status = self._appMenuQuitCB()
+        print(f"STATUS: {status}")
+        if status == "CANCEL":
+            qev.ignore()
+
+### BEGIN EVENT HANDLERS
+
+    def closeEvent(self, qev):
+        """Handle stand-alone document window closure safely."""
+        if self.pwvDoc().modified():
+            app = PWVApp.instance()
+            status = app.mainWin()._askToSaveDoc(self)
+            if status == "CANCEL":
+                qev.ignore()
+
 #    def keyPressEvent(self, qev):
 #        #print(f"PWVDocView.keyPressEvent: KEY:{qev.key()} TEXT:{repr(qev.text())}")
 #        #print(f"NVK: {qev.nativeVirtualKey()}")
@@ -366,5 +404,6 @@ class PWVDocView(QWidget):
 ##            print("DELETE")
 #        if qev.key() == QtCore.Qt.Key.Key_Backspace:
 #            self.deleteSelection()
-    # END EVENT HANDLERS
+
+### END EVENT HANDLERS
         

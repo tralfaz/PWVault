@@ -160,7 +160,6 @@ class PWVCard(QFrame):
 
         self.setLineWidth(5)
         self.setProperty("selected", "false")
-        self._setStyle()
         
         self._entry = entry
 
@@ -306,19 +305,6 @@ class PWVCard(QFrame):
         self._expanded = not self._expanded
         self._notesGRP.setVisible(self._expanded)
         
-    def _setStyle(self):
-        self.setStyleSheet("""
-          [selected="false"] {
-            background-color: black;
-            border: 5px solid gray;
-            border-radius: 0px;
-          }
-          [selected="true"] {
-            background-color: gray;
-            border: 5px solid yellow;
-            border-radius: 10px;
-          }
-          """)
     
 
 class PWVEncodedCard(QFrame):
