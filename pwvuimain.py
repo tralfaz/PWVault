@@ -1,4 +1,5 @@
 from functools import partial
+import os
 import sys
 
 from PyQt6 import QtCore
@@ -78,31 +79,6 @@ class PWVMainWin(QMainWindow):
         """Return the PWVDoc object belonging to the PWVDocView"""
         return self._docView.pwvDoc()
         
-    def fileMenuOpenCB(self):
-        dlgcap = "Open Vault..."
-        dialog = QFileDialog(self, caption=dlgcap,
-                             directory="", filter="*.pwv")
-        dialog.setOption(QFileDialog.Option.DontUseNativeDialog)
-        dialog.setFilter(QtCore.QDir.Filter.Files)
-        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
-        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        dialog.setNameFilter("PWVDoc (*.pwv *.pwvx)")
-        dialog.setViewMode(QFileDialog.ViewMode.Detail)
-        if dialog.exec():
-            fnames = dialog.selectedFiles()
-            print(f"FNAMES: {repr(fnames)}")
-            actWin = QApplication.instance().findActive()
-            if not actWin.docView().pwvDoc().encoded() and \
-               not actWin.docView().pwvDoc().entries():
-                actWin.docView().openFile(fnames[0])
-            else:
-                docView = PWVDocView()
-                docView.setVisible(True)
-                docView.openFile(fnames[0]
-                self.addDocView(docView)
-
-            self.updateWindowsMenu()
-                
     def fileMenuSaveAsCB(self):
 #       __init__(parent: QWidget = None, caption: Optional[str] = '', directory: Optional[str] = '', filter: Optional[str] = '')
         dlgcap = "Save Current Vault As..."
@@ -135,7 +111,6 @@ class PWVMainWin(QMainWindow):
 
         if docView.pwvDoc().wasDecoded():
             choice = self._saveWasDecodedDialog()
-            print(f"CHOICE: {choice}")
             if  choice == "Keep":
                 docView.encryptDoc(False)
             else:
@@ -237,8 +212,9 @@ class PWVMainWin(QMainWindow):
         openAct = QAction("&Open...", self)
         openAct.setShortcuts(QKeySequence.StandardKey.Open)
         openAct.setStatusTip("Open an existing file")
-        openAct.triggered.connect(self.fileMenuOpenCB)
+        openAct.triggered.connect(self._menuFileOpenCB)
         fileMenu.addAction(openAct)
+        self._buildOpenRecents(fileMenu)
         saveAct = QAction("Save...", self)
         saveAct.setShortcuts(QKeySequence.StandardKey.Save)
         saveAct.setStatusTip("Save curren vault")
@@ -310,6 +286,19 @@ class PWVMainWin(QMainWindow):
         # Windows menu
         self._winMenu = self.menuBar().addMenu("Windows")
 
+    def _buildOpenRecents(self, fileMenu):
+        recents = PWVApp.instance().recentFileOpens()
+        if not recents:
+            return
+        self._recentOpenActs = {}
+        recentMenu = fileMenu.addMenu("Recent Opens")
+        for path in recents:
+            print(f"RECENT: {path}")
+            recentAct = QAction(path)
+            recentAct.triggered.connect(partial(self._menuFileOpenRecentCB,path))
+            recentMenu.addAction(recentAct)
+            self._recentOpenActs[recentAct] = path
+
     def _decodeVaultCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView().decryptDoc()
@@ -361,6 +350,27 @@ class PWVMainWin(QMainWindow):
         docView.setVisible(True)
         self.addDocView(docView)
 
+    def _menuFileOpenCB(self):
+        dlgcap = "Open Vault..."
+        dialog = QFileDialog(self, caption=dlgcap,
+                             directory="", filter="*.pwv")
+        dialog.setOption(QFileDialog.Option.DontUseNativeDialog)
+        dialog.setFilter(QtCore.QDir.Filter.Files)
+        dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        dialog.setNameFilter("PWVDoc (*.pwv *.pwvx)")
+        dialog.setViewMode(QFileDialog.ViewMode.Detail)
+        if dialog.exec():
+            fnames = dialog.selectedFiles()
+            self._openVaultPath(fnames[0])
+
+    def _menuFileOpenRecentCB(self, path):
+        if not os.path.exists(path):
+            QMessageBox.warning(self, "File Not Found",
+                                f"The path {path} does not exist")
+            return
+        self._openVaultPath(path)
+        
     def _menuZoomMinusCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView()._zoomCards(-1)
@@ -368,6 +378,18 @@ class PWVMainWin(QMainWindow):
     def _menuZoomPlusCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView()._zoomCards(1)
+
+    def _openVaultPath(self, path):
+        actWin = QApplication.instance().findActive()
+        if not actWin.docView().pwvDoc().encoded() and \
+           not actWin.docView().pwvDoc().entries():
+            actWin.docView().openFile(path)
+        else:
+            docView = PWVDocView()
+            docView.setVisible(True)
+            docView.openFile(path)
+            self.addDocView(docView)
+        self.updateWindowsMenu()
 
     def _saveWasDecodedDialog(self):
         title = "<H2>Was Encoded</H2>"
@@ -388,7 +410,7 @@ class PWVMainWin(QMainWindow):
         msgBox.exec()
         dlgBTN = msgBox.clickedButton()
         if dlgBTN == keepBTN:
-            return "Keeps"
+            return "Keep"
         elif dlgBTN == recodeBTN:
             return "Recode"
         elif dlgBTN == clearBTN:

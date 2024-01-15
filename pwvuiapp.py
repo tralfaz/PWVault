@@ -34,12 +34,19 @@ class PWVApp(QApplication):
     def mainWin(self):
         return self._mainWin
 
+    def recentFileOpens(self):
+        return self._settings.value("appRecentFiles")
+
     def recentFileUpdate(self, path):
         if self._recentFiles is None:
             self._recentFiles = []
         if path in self._recentFiles:
             self._recentFiles.remove(path)
         self._recentFiles.append(path)
+        maxRecents = 6
+        rfLen = len(self._recentFiles)
+        if rfLen > maxRecents:
+            self._recentFiles = self._recentFiles[rfLen-maxRecents:]
         self._settings.setValue("appRecentFiles", self._recentFiles)
     
     def setMainWin(self, mainWin):
