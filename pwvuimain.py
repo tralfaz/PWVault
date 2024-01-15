@@ -96,11 +96,11 @@ class PWVMainWin(QMainWindow):
                not actWin.docView().pwvDoc().entries():
                 actWin.docView().openFile(fnames[0])
             else:
-                pwvDoc = PWVDoc()
-                pwvDoc.openDoc(fnames[0])
-                docView = PWVDocView(pwvDoc)
+                docView = PWVDocView()
                 docView.setVisible(True)
-                self._docWins.append(docView)
+                docView.openFile(fnames[0]
+                self.addDocView(docView)
+
             self.updateWindowsMenu()
                 
     def fileMenuSaveAsCB(self):
@@ -186,6 +186,12 @@ class PWVMainWin(QMainWindow):
         print(f"isActive: {self.isActive()}")
         
     def _appMenuQuitCB(self):
+        status = self._askToSaveAllDocs()
+        if status == "CANCEL":
+            return
+        PWVApp.instance().quit()
+        
+    def _askToSaveAllDocs(self):
         status = None
         for docw in self._docWins:
             if docw.docView().pwvDoc().modified():
@@ -193,25 +199,7 @@ class PWVMainWin(QMainWindow):
                 if status == "CANCEL":
                     return "CANCEL"
         return status
-#                fname = docw.docView().pwvDoc().fileName()
-#                msgBox = QMessageBox()
-#                msgBox.setIcon(QMessageBox.Icon.Question)
-#                msgBox.setText(f"The document {fname} has been modified.")
-#                msgBox.setInformativeText("Do you want to save your changes?")
-#                stdbtn = QMessageBox.StandardButton
-#                msgBox.setStandardButtons(stdbtn.Save | stdbtn.Discard | stdbtn.Cancel)
-#                msgBox.setDefaultButton(stdbtn.Save)
-#                status = msgBox.exec()
-#                if status == stdbtn.Save:
-#                    docStatus = docw.docView().saveDocument()
-#                    if docStatus == "CANCELED":
-#                        return
-#                elif status == stdbtn.Discard:
-#                    pass
-#                elif status == stdbtn.Cancel:
-#                    return
-        PWVApp.instance().quit()
-        
+
     def _askToSaveDoc(self, docw):
         fname = docw.docView().pwvDoc().fileName()
         msgBox = QMessageBox(docw)
@@ -417,7 +405,7 @@ class PWVMainWin(QMainWindow):
 
     def closeEvent(self, qev):
         """Handle main window closure safely"""
-        status = self._appMenuQuitCB()
+        status = self._askToSaveAllDocs()
         if status == "CANCEL":
             qev.ignore()
 

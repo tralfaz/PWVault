@@ -226,7 +226,8 @@ class PWVDocView(QWidget):
         self._buildCards()
         self.updateEntriesCounter()
         self.updateTitle()
-
+        if path:
+            PWVApp.instance().recentFileUpdate(path)
 
     def saveDocument(self):
         docPath = self.pwvDoc().path()
