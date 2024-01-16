@@ -163,7 +163,7 @@ class PWVDocView(QWidget):
 
     def decryptDoc(self):
         if not self.pwvDoc().encoded():
-            QMessageBox.information(self, "FOO", "Vault is not encoded.")
+            QMessageBox.information(self, "Unecoded", "Vault is not encoded.")
             return
 
         pswd = self.queryPswd("Vault Password")
