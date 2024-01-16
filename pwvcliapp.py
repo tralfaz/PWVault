@@ -1,59 +1,142 @@
-import argparse
 import getpass 
 import sys
+import re
 
 from pwvdoc import PWVDoc
+from pwvdoc import PWVKey
 from pwvdoc import PWVDocExc
 
 
-def FormatEntry(entry, args):
+def FormatEntry(entry, opts):
     entID   = entry.get("ID")
     entURL  = entry.get("URL")
     entUSER = entry.get("USER")
     entPSWD = entry.get("PSWD")
-    print(f"ID:   {entID}")
-    print(f"URL:  {entURL}")
-    print(f"USER: {entUSER}")
-    print(f"PSWD: {entPSWD}")
+
+    fields = opts.get("fields")
+
+    if "id" in fields:
+        print(f"ID:   {entID}")
+    if "url" in fields:
+        print(f"URL:  {entURL}")
+    if "user" in fields:
+        print(f"USER: {entUSER}")
+    if "pswd" in fields:
+        print(f"PSWD: {entPSWD}")
+    if "notes" in fields:
+        print(f"NOTES:\n{entry.get(PWVKey.NOTES, '')}")
     print()
     
 
+
+
+
+def Usage(errmsg):
+    if errmsg:
+        print(f"{errmsg}\n")
+
+    print("""Usage
+
+PWVault [--help] [options] pwvpath
+
+Where pwvpath is a file path to a PWVault file.
+
+[options] are:
+    
+    --idfilter {regex}
+    Filter the displayed entries with ID fields matching the supplied regular
+    expression.
+
+    --fields {id,url,user,pswd,notes,all}
+    Selects the fields to display for each selected entry.  Multiple field
+    names must be separated by commas.  The special field name all selects
+    all fields in the entrty.  The default fields are id,url.
+""")
+
+    if errmsg:
+        sys.exit(1)
+
+        
+optPwvpath = None
+optFields  = ["id", "url"]
+optIdFilter = None
+
+    
+def ParseArgs():
+    opts = { "pwvpath": None,
+            "fields": ["id","url"],
+            "idfilter": None }
+
+    argc = len(sys.argv)
+    argx = 1
+    while argx < argc:
+        arg = sys.argv[argx]
+        if arg == "--fields":
+            optFields = []
+            if argx < argc-2:
+                argx += 1
+                validFields = ["id", "url", "user", "pswd", "notes", "all"]
+                optFields = sys.argv[argx].split(",")
+                for fld in optFields[:]:
+                    print(f"FLD: {fld}")
+                    if fld not in validFields:
+                        Usage(f"{fld} is not a valid field selector")
+                    elif fld == "all":
+                        optFields = ["id", "url", "user", "pswd", "notes"]
+                    else:
+                        optFields.append(fld)
+                opts["fields"] = optFields
+            else:
+                Usage("Missing pattern regex for --idfilter argument")
+
+        elif arg == "--idfilter":
+            if argx < argc-2:
+                argx += 1
+                regex = sys.argv[argx]
+                try:
+                    opts["idfilter"] = re.compile(regex)
+                except re.error as rex:
+                    Usage(f"ERROR: Bad --idfilter regex {rex}")
+            else:
+                Usage("Missing pattern regex for --idfilter argument")
+
+        elif arg == "--help":
+            Usage(None)
+            sys.exit(0)
+
+        elif argx == argc-1 and arg[:1] != "-":
+            opts["pwvpath"] = arg
+
+        else:
+             Usage("ERROR: Invalid option: {repr(arg)}")
+
+        argx += 1
+
+    return opts
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="PWVault")
-#    parser.add_argument("--id", dest="idPattern",
+   
+    opts = ParseArgs()
 
-#    parser.add_argument('integers', metavar='N', type=int, nargs='+',
-#                        help='an integer for the accumulator')
-#    parser.add_argument('--sum', dest='accumulate', action='store_const',
-#                        const=sum, default=max,
-#                        help='sum the integers (default: find the max)')
+    pwvpath = opts.get("pwvpath")
+    if not pwvpath:
+        Usage("pwvpath is not specified")
 
-    parser.add_argument("--fields", choices=["id","url","user","pswd","notes"],
-                        nargs="+")
-    parser.add_argument("--id", dest="idpat",
-                        help="limit output to entries matching ID pattern")
-    parser.add_argument("pwvpath", type=str, nargs=1,
-                        help="Path to PWVault file")
+    pwvDoc = PWVDoc()
+    pwvDoc.openDoc(pwvpath)
 
-    args = parser.parse_args()
-#    print(args.accumulate(args.integers))
-    print(f"PATH: {args.pwvpath}")
-    print(f"IDPAT: {args.idpat}")
-    print(f"FIELDS: {args.fields}")
+    if pwvDoc.encoded():
+        pswd = getpass.getpass("Password: ")
+        if pswd:
+            status = pwvDoc.decrypt(pswd)
+            if status != "OK":
+                print("Bad Password: {status}")
+                sys.exit(1)
 
-    if args.pwvpath:
-        pwvDoc = PWVDoc()
-        pwvDoc.openDoc(args.pwvpath[0])
-
-        if pwvDoc.encoded():
-            pswd = getpass.getpass("Password: ")
-            if pswd:
-                status = pwvDoc.decrypt(pswd)
-                print(f"Decrypt status: {status}")
-                if status != "OK":
-                    print("Bad Password: {status}")
-                    sys.exit(1)
-
-                print(f"ENTRY COUNT: {len(pwvDoc.entries())}")
-                for entry in pwvDoc.entries():
-                    FormatEntry(entry, args)
+    idFilter = opts.get("idfilter")
+    for entry in pwvDoc.entries():
+        if idFilter and idFilter.search(entry.get(PWVKey.ID, "")):
+            FormatEntry(entry, opts)
+        elif not idFilter:
+            FormatEntry(entry, opts)
