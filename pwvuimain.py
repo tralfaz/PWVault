@@ -47,12 +47,6 @@ class PWVMainWin(QMainWindow):
         self.setWindowTitle("PWVault")
         self.setGeometry(200, 500, 800, 600)
 
-#        self.msgSc = QShortcut(QKeySequence('Ctrl+M'), self)
-#        self.msgSc.activated.connect(lambda : QMessageBox.information(self,
-#            'Message', 'Ctrl + M initiated'))
-#        self.quitSc = QShortcut(QKeySequence('Ctrl+Q'), self)
-#        self.quitSc.activated.connect(QApplication.instance().quit)
-
         self._docView = PWVDocView()
         self.setCentralWidget(self._docView)
 
@@ -120,6 +114,11 @@ class PWVMainWin(QMainWindow):
         docView.pwvDoc().setModified(False)
         docView.updateTitle()
 
+    def removeDocView(self, docView):
+        if docView in self._docWins:
+            self._docWins.remove(docView)
+            self.updateWindowsMenu()
+
     def updateWindowsMenu(self):
         self._winMenu.clear()
         for dvx, docView in enumerate(self._docWins):
@@ -136,13 +135,12 @@ class PWVMainWin(QMainWindow):
         self._entryAdded = True
         docEnts = self._mainDoc.entries()
         nents = len(docEnts)
-        entry = {
-            PWVKey.ID : f"Entry-{nents}",
-                PWVKey.URL: f"url - {nents}",
-                PWVKey.USER : f"user - {nents}",
-                PWVKey.PSWD : f"pswd - {nents}",
-                PWVKey.NOTES: f"This is note {nents}"
-            }
+        entry = { PWVKey.ID : f"Entry-{nents}",
+                  PWVKey.URL: f"url - {nents}",
+                  PWVKey.USER : f"user - {nents}",
+                  PWVKey.PSWD : f"pswd - {nents}",
+                  PWVKey.NOTES: f"This is note {nents}" }
+
         docEnts.append(entry)
         card = PWVCard(entry)
         vbar = self._docScrollArea.verticalScrollBar()
@@ -171,8 +169,13 @@ class PWVMainWin(QMainWindow):
         for docw in self._docWins:
             if docw.docView().pwvDoc().modified():
                 status = self._askToSaveDoc(docw)
+                print(f"_askToSaveAllDocs: {docw.docView().pwvDoc().fileName()} status={status}")
                 if status == "CANCEL":
                     return "CANCEL"
+                elif status == "DISCARD":
+                    docw.pwvDoc().setModified(False)
+                    self.removeDocView(docw)
+                    docw.close()
         return status
 
     def _askToSaveDoc(self, docw):
@@ -238,6 +241,11 @@ class PWVMainWin(QMainWindow):
         undoAct.setStatusTip("Undo prior changes")
         undoAct.triggered.connect(self._menuEditUndoCB)
         editMenu.addAction(undoAct)
+        addEntryAlt = QAction("Add  Entry", self)
+        addEntryAlt.setShortcut(QKeySequence("Ctrl+e"))
+        addEntryAlt.setStatusTip("Add new entry")
+        addEntryAlt.triggered.connect(self._menuEditAddEntryCB)
+        editMenu.addAction(addEntryAlt)
 
         # Arrange menu
         self._arrangeMenu = self.menuBar().addMenu("Arrange")
@@ -345,6 +353,13 @@ class PWVMainWin(QMainWindow):
         msgBox.setInformativeText(info)
         msgBox.exec()
 
+    def _menuEditAddEntryCB(self):
+        actWin = QApplication.instance().findActive()
+        docView = actWin.docView()
+        if docView.pwvDoc().encoded():
+            return
+        docView.addEntry()
+
     def _menuFileNewCB(self):
         docView = PWVDocView()
         docView.setVisible(True)
@@ -373,11 +388,11 @@ class PWVMainWin(QMainWindow):
         
     def _menuZoomMinusCB(self):
         actWin = QApplication.instance().findActive()
-        actWin.docView()._zoomCards(-1)
+        actWin.docView().zoomCards(-1)
 
     def _menuZoomPlusCB(self):
         actWin = QApplication.instance().findActive()
-        actWin.docView()._zoomCards(1)
+        actWin.docView().zoomCards(1)
 
     def _openVaultPath(self, path):
         actWin = QApplication.instance().findActive()
@@ -427,10 +442,15 @@ class PWVMainWin(QMainWindow):
 
     def closeEvent(self, qev):
         """Handle main window closure safely"""
-        status = self._askToSaveAllDocs()
-        if status == "CANCEL":
-            qev.ignore()
-
+        if self.pwvDoc().modified():
+            status = self._askToSaveDoc(self)
+            print(f"PWVMainWin.closeEvent: status={status}")
+            if status == "CANCEL":
+                qev.ignore()
+            elif status == "DISCARD":
+                self.pwvDoc().setModified(False)
+                self.removeDocView(self)
+            
 ### END EVENT HANDLERS
 
 

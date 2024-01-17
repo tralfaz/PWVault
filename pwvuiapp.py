@@ -87,20 +87,17 @@ class PWVApp(QApplication):
         self.setOrganizationDomain("midoma.com")
         self.setApplicationName("PWVault")
 
-        self._settings = QSettings() #'PWVault', 'App1')
+        self._settings = QSettings()
         print(f"SETTINGS FILE: {self._settings.fileName()}")
         try:
             self._recentFiles = self._settings.value("appRecentFiles")
             print(f"RECENT: {self._recentFiles}")
-#            self.resize(self.settings.value('window size'))
-#            self.move(self.settings.value('window position'))
         except Exception as exc:
             print(f"SETTINGS: TYPE({type(exc)} {exc}")
 #     def closeEvent(self, event):
 #        self.settings.setValue('window size', self.size())
 #        self.settings.setValue('window position', self.pos())
 
-        
     def _setAppWideStyles(self):
         pass
 #        self.setStyleSheet("""

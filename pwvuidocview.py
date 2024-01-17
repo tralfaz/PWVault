@@ -35,8 +35,9 @@ class PWVDocView(QWidget):
             self.setWindowTitle(f"PWVault: {fname}")
 
         self._entryAdded = False
+        self._cardZoom   = None
 
-        self._cards= []
+        self._cards = []
         self._lastCardSelected = None
         
         self._buildDocWindow()
@@ -47,6 +48,7 @@ class PWVDocView(QWidget):
         entry = self._pwvDoc.newEntry()
         self._pwvDoc.appendEntries([entry])
         card = PWVCard(entry)
+        card.zoom(self.cardZoom())
         self._cards.append(card)
         vbar = self._docScrollArea.verticalScrollBar()
         saRect = self._formLayout.contentsRect()
@@ -91,6 +93,79 @@ class PWVDocView(QWidget):
         self.pwvDoc().setModified(True)
         self.updateTitle()
 
+    def cardZoom(self):
+        if self._cardZoom is None:
+            stgmgr = PWVApp.instance().settings()
+            docPath = self._pwvDoc.fileName()
+            if docPath:
+                zoomKey = docPath + "::cardZoom"
+                cardZoom = stgmgr.value(zoomKey)
+                self._cardZoom = 0 if not cardZoom else cardZoom 
+            else:
+                self._cardZoom = 0
+
+        return self._cardZoom
+
+    def decryptDoc(self):
+        if not self.pwvDoc().encoded():
+            QMessageBox.information(self, "Unecoded", "Vault is not encoded.")
+            return
+
+        pswd = self.queryPswd("Vault Password")
+        if not pswd:
+            return
+
+        status = self._pwvDoc.decrypt(pswd)
+
+        if status != "OK":
+            QMessageBox.warning(self, status[0], status[1])
+            return
+    
+        self._clearCards()
+        self._buildCards()
+        self.updateTitle()
+        
+    def deleteSelection(self): 
+        modified = False
+        for cdx, card in enumerate(self._cards):
+            if card.selected():
+                self._cards.pop(cdx)
+                entry = self.pwvDoc().popEntry(cdx)
+                self._formLayout.removeRow(cdx) 
+                modified = True
+        if modified:
+            self.pwvDoc().setModified(True)
+            self.updateTitle()
+            self.updateEntriesCounter()
+                
+    def encryptDoc(self, recode=True):
+        #msgBox = QMessageBox.information(self, "FOO", "BAR")
+        if self.pwvDoc().encoded():
+            QMessageBox.information(self, "FOO", "Vault is already encoded.")
+            return
+
+        if recode or not self._pwvDoc.wasDecoded():
+            pswd1 = self.queryPswd("Vault Password")
+            if not pswd1:
+                return
+            pswd2 = self.queryPswd("Confirm Password")
+            if pswd1 != pswd2:
+                QMessageBox.warning(self, "XXX", "Passwords do not match.")
+                return
+        else:
+            pswd1 = None
+
+#        self._getCardValues()
+        self._pwvDoc.encrypt(pswd1)
+        self._pwvDoc.setModified(True)
+        pswd1 = pswd2 = None
+        
+        self._clearCards()
+        self._buildCards()
+        
+        self.updateTitle()
+        self.updateEntriesCounter()
+        
     def docView(self):
         return self
 
@@ -161,66 +236,6 @@ class PWVDocView(QWidget):
         else:
             self.setWindowTitle(title + fname + encoded)
 
-    def decryptDoc(self):
-        if not self.pwvDoc().encoded():
-            QMessageBox.information(self, "Unecoded", "Vault is not encoded.")
-            return
-
-        pswd = self.queryPswd("Vault Password")
-        if not pswd:
-            return
-
-        status = self._pwvDoc.decrypt(pswd)
-
-        if status != "OK":
-            QMessageBox.warning(self, status[0], status[1])
-            return
-    
-        self._clearCards()
-        self._buildCards()
-        self.updateTitle()
-        
-    def deleteSelection(self): 
-        modified = False
-        for cdx, card in enumerate(self._cards):
-            if card.selected():
-                self._cards.pop(cdx)
-                entry = self.pwvDoc().popEntry(cdx)
-                self._formLayout.removeRow(cdx) 
-                modified = True
-        if modified:
-            self.pwvDoc().setModified(True)
-            self.updateTitle()
-            self.updateEntriesCounter()
-                
-    def encryptDoc(self, recode=True):
-        #msgBox = QMessageBox.information(self, "FOO", "BAR")
-        if self.pwvDoc().encoded():
-            QMessageBox.information(self, "FOO", "Vault is already encoded.")
-            return
-
-        if recode or not self._pwvDoc.wasDecoded():
-            pswd1 = self.queryPswd("Vault Password")
-            if not pswd1:
-                return
-            pswd2 = self.queryPswd("Confirm Password")
-            if pswd1 != pswd2:
-                QMessageBox.warning(self, "XXX", "Passwords do not match.")
-                return
-        else:
-            pswd1 = None
-
-#        self._getCardValues()
-        self._pwvDoc.encrypt(pswd1)
-        self._pwvDoc.setModified(True)
-        pswd1 = pswd2 = None
-        
-        self._clearCards()
-        self._buildCards()
-        
-        self.updateTitle()
-        self.updateEntriesCounter()
-        
     def openFile(self, path=None):
         self._pwvDoc.openDoc(path)
         self._buildCards()
@@ -252,6 +267,20 @@ class PWVDocView(QWidget):
     def saveFile(self, path=None):
         self._pwvDoc.saveDocAs(path)
 
+    def zoomCards(self, pointDelta):
+        stgmgr = PWVApp.instance().settings()
+        docPath = self._pwvDoc.fileName()
+        if docPath:
+            zoomKey = docPath + "::cardZoom"
+            cardZoom = stgmgr.value(zoomKey)
+            self._cardZoom = 0 if not cardZoom else cardZoom
+            print(f"cardZoom: {repr(cardZoom)}")
+        self._cardZoom += pointDelta
+        for card in self._cards:
+            card.zoom(pointDelta)
+        if docPath:
+            stgmgr.setValue(zoomKey, self._cardZoom)
+
     def _buildCards(self):
         if not self._pwvDoc.encoded():
             self._searchLE.setVisible(True)
@@ -265,9 +294,13 @@ class PWVDocView(QWidget):
         else:
             self._searchLE.setVisible(False)
             card = PWVEncodedCard()
-#            self._cards.append(card)
             self._formLayout.addRow(card)
             self._addEntryBTN.setVisible(False)
+
+        cardZoom = self.cardZoom()
+        if cardZoom:
+            for card in self._cards:
+                card.zoom(cardZoom)
 
         self.updateEntriesCounter()
         self.updateTitle()
@@ -374,12 +407,6 @@ class PWVDocView(QWidget):
         for card in self._cards:
             card.setVisible(card.searchMatch(text, fullSearch))
 
-    def _zoomCards(self, pointDelta):
-        for card in self._cards:
-            card.zoom(pointDelta)
-
-    # BEGIN EVENT HANDLERS
-
 ### BEGIN EVENT HANDLERS
 
     def closeEvent(self, qev):
@@ -395,6 +422,7 @@ class PWVDocView(QWidget):
         if self.pwvDoc().modified():
             app = PWVApp.instance()
             status = app.mainWin()._askToSaveDoc(self)
+            print(f"DocView.closeEvent: status={status}")
             if status == "CANCEL":
                 qev.ignore()
 
