@@ -249,17 +249,27 @@ class PWVMainWin(QMainWindow):
 
         # Arrange menu
         self._arrangeMenu = self.menuBar().addMenu("Arrange")
-        self._arrangeUpAct = QAction("Move up", self)
+        self._arrangeStartAct = QAction("Move to start", self)
+        self._arrangeStartAct.setStatusTip("Move selected start of entries.")
+        self._arrangeStartAct.setShortcut(QKeySequence("Ctrl+Home"))
+        self._arrangeStartAct.triggered.connect(self._menuArrangeStartCB)
+        self._arrangeMenu.addAction(self._arrangeStartAct)
+        self._arrangeUpAct = QAction("Move Up", self)
         self._arrangeUpAct.setStatusTip("Move selected up 1 position.")
         self._arrangeUpAct.setShortcut(QKeySequence("Ctrl+Up"))
         self._arrangeUpAct.triggered.connect(self._menuArrangeUpCB)
         self._arrangeMenu.addAction(self._arrangeUpAct)
-        self._arrangeDownAct = QAction("Move up", self)
+        self._arrangeDownAct = QAction("Move Down", self)
         self._arrangeDownAct.setStatusTip("Move selected up 1 position.")
         self._arrangeDownAct.setShortcut(QKeySequence("Ctrl+Down"))
         self._arrangeDownAct.triggered.connect(self._menuArrangeDownCB)
         self._arrangeMenu.addAction(self._arrangeDownAct)
-
+        self._arrangeEndAct = QAction("Move to end", self)
+        self._arrangeEndAct.setStatusTip("Move selected end of entries.")
+        self._arrangeEndAct.setShortcut(QKeySequence("Ctrl+End"))
+        self._arrangeEndAct.triggered.connect(self._menuArrangeEndCB)
+        self._arrangeMenu.addAction(self._arrangeEndAct)
+        
         # Encode menu
         self._encodeMenu = self.menuBar().addMenu("Encoding")
         self._decodeVaultAct = QAction("Decode Vault...", self)
@@ -298,6 +308,7 @@ class PWVMainWin(QMainWindow):
         recents = PWVApp.instance().recentFileOpens()
         if not recents:
             return
+        recents.reverse()
         self._recentOpenActs = {}
         recentMenu = fileMenu.addMenu("Recent Opens")
         for path in recents:
@@ -333,6 +344,14 @@ class PWVMainWin(QMainWindow):
     def _menuArrangeDownCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView().arrangeDown()
+
+    def _menuArrangeEndCB(self):
+        actWin = QApplication.instance().findActive()
+        actWin.docView().arrangeEnd()
+
+    def _menuArrangeStartCB(self):
+        actWin = QApplication.instance().findActive()
+        print("_menuArrangeStartCB")
 
     def _menuArrangeUpCB(self):
         actWin = QApplication.instance().findActive()
@@ -444,7 +463,6 @@ class PWVMainWin(QMainWindow):
         """Handle main window closure safely"""
         if self.pwvDoc().modified():
             status = self._askToSaveDoc(self)
-            print(f"PWVMainWin.closeEvent: status={status}")
             if status == "CANCEL":
                 qev.ignore()
             elif status == "DISCARD":

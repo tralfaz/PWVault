@@ -76,6 +76,23 @@ class PWVDocView(QWidget):
         self.pwvDoc().setModified(True)
         self.updateTitle()
 
+    def arrangeEnd(self):
+        selectedCards = []
+        cardCount = len(self._cards)
+        for cdx,card in enumerate(self._cards[:]):
+            if card.selected():
+                slen = len(selectedCards)
+                self.pwvDoc().moveEntry(cdx-slen, cardCount-1)
+                selectedCards.append(card)
+        if not selectedCards:
+            return
+        self._clearCards()
+        self._buildCards()
+        for card in self._cards[cardCount-len(selectedCards):]:
+            card.setSelected(True)
+        self.pwvDoc().setModified(True)
+        self.updateTitle()
+
     def arrangeUp(self):
         selectedCards = []
         for cdx, card in enumerate(self._cards):
@@ -194,17 +211,17 @@ class PWVDocView(QWidget):
 
         inExtend = False
         for card in self._cards:
-            print(f"CARD: {card.entryID()}")
+#            print(f"CARD: {card.entryID()}")
             if inExtend:
                 card.setSelected(True)
                 if card is cardClicked or card is self._lastCardSelected:
                     inExtend =  False
-                    print("OUT EXTEND")
+#                    print("OUT EXTEND")
             else:
                 if card is cardClicked or card is self._lastCardSelected:
                     card.setSelected(True)
                     inExtend =  True
-                    print("IN EXTEND")
+#                    print("IN EXTEND")
 
         self._lastCardSelected = cardClicked
 
