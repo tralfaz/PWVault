@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import QGroupBox
 from PyQt6.QtWidgets import QInputDialog
 from PyQt6.QtWidgets import QLineEdit
 from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QProgressDialog
 from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtWidgets import QScrollArea
 from PyQt6.QtWidgets import QVBoxLayout
@@ -93,11 +94,30 @@ class PWVDocView(QWidget):
         self.pwvDoc().setModified(True)
         self.updateTitle()
 
+    def arrangeStart(self):
+        selectedCards = []
+        cardCount = len(self._cards)
+        cdx = cardCount-1
+        for card in reversed(self._cards):
+            if card.selected():
+                slen = len(selectedCards)
+                if cdx > slen:
+                    self.pwvDoc().moveEntry(cdx+slen, 0)
+                    selectedCards.append(slen)
+            cdx -= 1
+        if not selectedCards:
+            return
+        self._clearCards()
+        self._buildCards()
+        for cdx in selectedCards:
+            self._cards[cdx].setSelected(True)
+        self.pwvDoc().setModified(True)
+        self.updateTitle()
+
     def arrangeUp(self):
         selectedCards = []
         for cdx, card in enumerate(self._cards):
             if card.selected():
-                print(f"arrangeUp: SEL {cdx}")
                 if cdx > 0:
                     self.pwvDoc().moveEntry(cdx, cdx-1)
                     selectedCards.append(cdx-1)
@@ -301,12 +321,27 @@ class PWVDocView(QWidget):
     def _buildCards(self):
         if not self._pwvDoc.encoded():
             self._searchLE.setVisible(True)
-            for entry in self._pwvDoc.entries():
+            
+            nent = len(self._pwvDoc.entries())
+            if nent > 10:
+                progDlg = QProgressDialog("Building Cards...",
+                                          "X", 0, nent, self.window())
+                progDlg.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+                progDlg.forceShow()
+            else:
+                progDlg = None 
+
+            for edx,entry in enumerate(self._pwvDoc.entries()):
                 card = PWVCard(entry)
                 self._cards.append(card)
                 self._formLayout.addRow(card)
+                if progDlg:
+                    progDlg.setValue(edx)
+            
             self._searchMODL.setStringList(self._pwvDoc.searchCompletions())
             self._addEntryBTN.setVisible(True)
+            if progDlg:
+                progDlg.setValue(nent)
 
         else:
             self._searchLE.setVisible(False)

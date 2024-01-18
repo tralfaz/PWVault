@@ -351,7 +351,7 @@ class PWVMainWin(QMainWindow):
 
     def _menuArrangeStartCB(self):
         actWin = QApplication.instance().findActive()
-        print("_menuArrangeStartCB")
+        actWin.docView().arrangeStart()
 
     def _menuArrangeUpCB(self):
         actWin = QApplication.instance().findActive()
