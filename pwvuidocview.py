@@ -19,6 +19,23 @@ from pwvuicard import PWVCard
 from pwvuicard import PWVEncodedCard
 
 
+class CardsScrollArea(QScrollArea):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def keyPressEvent(self, qev):
+        super().keyPressEvent(qev)
+        if qev.key() == QtCore.Qt.Key.Key_End:
+            vsb = self.verticalScrollBar()
+            if vsb:
+                vsb.setValue(vsb.maximum())
+        elif qev.key() == QtCore.Qt.Key.Key_Home:
+            vsb = self.verticalScrollBar()
+            if vsb:
+                vsb.setValue(0)
+
+
 
 class PWVDocView(QWidget):
 
@@ -403,7 +420,8 @@ class PWVDocView(QWidget):
         cardsForm = QWidget()
         cardsForm.setLayout(self._formLayout)
         
-        self._docScrollArea = scroll = QScrollArea()
+#        self._docScrollArea = scroll = QScrollArea()
+        self._docScrollArea = scroll = CardsScrollArea()
         scroll.setWidgetResizable(True)
         scroll.verticalScrollBar().rangeChanged.connect(self._docScrollRangeCB)
         scroll.setWidget(cardsForm)
