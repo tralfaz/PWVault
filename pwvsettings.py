@@ -15,7 +15,6 @@ class PWVSettings(QObject):
 
         self._settings = QSettings()
 
-        print(f"SETTINGS FILE: {self._settings.fileName()}")
         keys = self._settings.allKeys()
         for key in keys:
             print(f"KEY: {key}")
@@ -27,35 +26,31 @@ class PWVSettings(QObject):
 #     def closeEvent(self, event):
 #        self.settings.setValue('window size', self.size())
 #        self.settings.setValue('window position', self.pos())
-        if self._recentFiles:
-            self._settings.beginGroup("PwvUiApp")
-#            self._settings.setValue("appRecentFiles",  self._recentFiles)
-            keys = self._settings.allKeys()
-            for key in keys:
-                print(f"    KEY: {key}")
-                self._settings.endGroup()
 
     def load(self):
         self._settings.beginGroup(self._group)
-#            self._settings.setValue("appRecentFiles",  self._recentFiles)
-
         self._cache = { key:self._settings.value(key)
                             for key in self._settings.allKeys() }
-
-
-        for key in self._cache.keys():
-            print(f"{self._group}[{key} = {self._cache}")
-
         self._settings.endGroup()
+        self.setModified(False)
         
     def fileName(self):
         return self._settings.fileName()
 
+    def modified(self):
+        return self._modified
+    
     def saveAll(self):
         self._settings.beginGroup(self._group)
-        for key,val in self._cache:
+        for key,val in self._cache.items():
+            print(f"{self._group}: {key} <- {val}")
             self._settings.setValue(key,val)
         self._settings.endGroup()
+        self.setModified(False)
+
+    def setValue(self, key, value):
+        self._cache[key] = value
+        self.setModified(True)
 
     def setModified(self, state):
         self._modified = state
@@ -77,7 +72,11 @@ class PWVUiSettings(PWVSettings):
 
         self._group = "PwvUiApp"
 
-        
+    def cardZoom(self, winName, zoomDelta=0):
+        zoomKey = "CardZoom::" + winName
+        zoomVal = self._cache.get(zoomKey,0) + zoomDelta
+        self.setValue(zoomKey, zoomVal)
+        return zoomVal
 
 if __name__ == "__main__":
     import sys
@@ -88,4 +87,26 @@ if __name__ == "__main__":
     uiSettings = PWVUiSettings(app)
     uiSettings.load()
     print(f"PATH: {uiSettings.fileName()}")
+    topKeys = uiSettings._settings.allKeys()
+    for key in topKeys:
+        print(f"TOP KEY: {key}")
+
     print(f"CACHE: {uiSettings._cache}")
+
+    if len(sys.argv) > 1 and sys.argv[1] == "move":
+        for key in topKeys:
+            if key.endswith("::cardZoom"):
+                toKey = "CardZoom::" + key[:-10]
+                toVal = uiSettings._settings.value(key)
+                print(f"{key} -> {toKey} = {toVal}")
+                uiSettings.setValue(toKey, toVal)
+            elif key == "appRecentFiles":
+                toKey = "RecentOpens"
+                toVal = uiSettings._settings.value(key)
+                print(f"{key} -> {toKey} = {toVal}")
+                uiSettings.setValue(toKey, toVal)
+
+        print(f"CACHE: {uiSettings._cache}")
+        uiSettings.saveAll()
+                
+        

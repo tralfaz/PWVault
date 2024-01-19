@@ -108,6 +108,9 @@ class PWVDocView(QWidget):
         self._buildCards()
         for card in self._cards[cardCount-len(selectedCards):]:
             card.setSelected(True)
+        vsb = self._docScrollArea.verticalScrollBar()
+        if vsb:
+            vsb.setValue(vsb.maximum())
         self.pwvDoc().setModified(True)
         self.updateTitle()
 
@@ -128,6 +131,9 @@ class PWVDocView(QWidget):
         self._buildCards()
         for cdx in selectedCards:
             self._cards[cdx].setSelected(True)
+        vsb = self._docScrollArea.verticalScrollBar()
+        if vsb:
+            vsb.setValue(0)
         self.pwvDoc().setModified(True)
         self.updateTitle()
 
@@ -420,7 +426,6 @@ class PWVDocView(QWidget):
         cardsForm = QWidget()
         cardsForm.setLayout(self._formLayout)
         
-#        self._docScrollArea = scroll = QScrollArea()
         self._docScrollArea = scroll = CardsScrollArea()
         scroll.setWidgetResizable(True)
         scroll.verticalScrollBar().rangeChanged.connect(self._docScrollRangeCB)

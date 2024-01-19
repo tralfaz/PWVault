@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import QMenuBar
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtWidgets import QScrollArea
+#from PyQt6.QtWidgets import QStatusBar
 from PyQt6.QtWidgets import QVBoxLayout
 from PyQt6.QtWidgets import QWidget
 
@@ -56,6 +57,8 @@ class PWVMainWin(QMainWindow):
             self._docView.openFile(sys.argv[1])
 
         self.addDocView(self)
+
+#        self.setStatusBar(QStatusBar(self))
 
     def addDocView(self, docView):
         self._docWins.append(docView)
