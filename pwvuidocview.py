@@ -53,7 +53,6 @@ class PWVDocView(QWidget):
             self.setWindowTitle(f"PWVault: {fname}")
 
         self._entryAdded = False
-        self._cardZoom   = None
 
         self._cards = []
         self._lastCardSelected = None
@@ -154,17 +153,9 @@ class PWVDocView(QWidget):
         self.updateTitle()
 
     def cardZoom(self):
-        if self._cardZoom is None:
-            stgmgr = PWVApp.instance().settings()
-            docPath = self._pwvDoc.fileName()
-            if docPath:
-                zoomKey = docPath + "::cardZoom"
-                cardZoom = stgmgr.value(zoomKey)
-                self._cardZoom = 0 if not cardZoom else cardZoom 
-            else:
-                self._cardZoom = 0
-
-        return self._cardZoom
+        stgmgr = PWVApp.instance().settings()
+        docPath = self._pwvDoc.fileName()
+        return stgmgr.cardZoom(docPath)
 
     def decryptDoc(self):
         if not self.pwvDoc().encoded():
@@ -328,18 +319,13 @@ class PWVDocView(QWidget):
         self._pwvDoc.saveDocAs(path)
 
     def zoomCards(self, pointDelta):
+        for card in self._cards:
+            card.zoom(pointDelta)
+
         stgmgr = PWVApp.instance().settings()
         docPath = self._pwvDoc.fileName()
         if docPath:
-            zoomKey = docPath + "::cardZoom"
-            cardZoom = stgmgr.value(zoomKey)
-            self._cardZoom = 0 if not cardZoom else cardZoom
-            print(f"cardZoom: {repr(cardZoom)}")
-        self._cardZoom += pointDelta
-        for card in self._cards:
-            card.zoom(pointDelta)
-        if docPath:
-            stgmgr.setValue(zoomKey, self._cardZoom)
+            stgmgr.cardZoom(docPath, pointDelta)
 
     def _buildCards(self):
         if not self._pwvDoc.encoded():
@@ -494,12 +480,17 @@ class PWVDocView(QWidget):
 
     def closeEvent(self, qev):
         """Handle stand-alone document window closure safely."""
+        print(f"PWVDocView.closeEvent {qev}")
         if self.pwvDoc().modified():
             app = PWVApp.instance()
             status = app.mainWin()._askToSaveDoc(self)
             print(f"DocView.closeEvent: status={status}")
             if status == "CANCEL":
                 qev.ignore()
+        # Save app settings
+        stgmgr = PWVApp.instance().settings()
+        stgmgr.saveAll()
+        
 
 #    def keyPressEvent(self, qev):
 #        #print(f"PWVDocView.keyPressEvent: KEY:{qev.key()} TEXT:{repr(qev.text())}")

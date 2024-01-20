@@ -5,6 +5,8 @@ from PyQt6.QtCore    import QSettings
 from PyQt6 import QtGui
 from PyQt6.QtWidgets import QApplication
 
+from pwvsettings import PWVUiSettings
+
 
 class PWVApp(QApplication):
 
@@ -12,7 +14,6 @@ class PWVApp(QApplication):
         super().__init__(sys.argv)
 
         self._mainWin = None
-        self._recentFiles = []
         
         self.focusChanged.connect(self._focusChangedCB)
 
@@ -35,19 +36,18 @@ class PWVApp(QApplication):
         return self._mainWin
 
     def recentFileOpens(self):
-        return self._settings.value("appRecentFiles")
+        return self._settings.recentOpens()
 
     def recentFileUpdate(self, path):
-        if self._recentFiles is None:
-            self._recentFiles = []
-        if path in self._recentFiles:
-            self._recentFiles.remove(path)
-        self._recentFiles.append(path)
+        recentOpens = self._settings.recentOpens()
+        if path in recentOpens:
+            recentOpens.remove(path)
+        recentOpens.append(path)
         maxRecents = 6
-        rfLen = len(self._recentFiles)
+        rfLen = len(recentOpens)
         if rfLen > maxRecents:
-            self._recentFiles = self._recentFiles[rfLen-maxRecents:]
-        self._settings.setValue("appRecentFiles", self._recentFiles)
+            recentOpens = recentOpens[rfLen-maxRecents:]
+        self._settings.setRecentOpens(recentOpens)
     
     def setMainWin(self, mainWin):
         self._mainWin = mainWin
@@ -83,20 +83,14 @@ class PWVApp(QApplication):
         self._assets["search-icon-yellow"] = icon
 
     def _loadSettings(self):
-        self.setOrganizationName("MiDoMa")
-        self.setOrganizationDomain("midoma.com")
-        self.setApplicationName("PWVault")
-
-        self._settings = QSettings()
+        self._settings = PWVUiSettings(self)
+        self._settings.load()
         print(f"SETTINGS FILE: {self._settings.fileName()}")
         try:
-            self._recentFiles = self._settings.value("appRecentFiles")
+            self._recentFiles = self._settings.recentOpens()
             print(f"RECENT: {self._recentFiles}")
         except Exception as exc:
             print(f"SETTINGS: TYPE({type(exc)} {exc}")
-#     def closeEvent(self, event):
-#        self.settings.setValue('window size', self.size())
-#        self.settings.setValue('window position', self.pos())
 
     def _setAppWideStyles(self):
         pass

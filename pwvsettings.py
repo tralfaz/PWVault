@@ -5,24 +5,16 @@ class PWVSettings(QObject):
 
     def __init__(self, pwvapp, parent=None):
         super().__init__(parent)
-        self._app = app
+        self._app = pwvapp
 
         self._modified = False
 
-        app.setOrganizationName("MiDoMa")
-        app.setOrganizationDomain("midoma.com")
-        app.setApplicationName("PWVault")
+        pwvapp.setOrganizationName("MiDoMa")
+        pwvapp.setOrganizationDomain("midoma.com")
+        pwvapp.setApplicationName("PWVault")
 
         self._settings = QSettings()
 
-        keys = self._settings.allKeys()
-        for key in keys:
-            print(f"KEY: {key}")
-        try:
-            self._recentFiles = self._settings.value("appRecentFiles")
-            print(f"RECENT: {self._recentFiles}")
-        except Exception as exc:
-            print(f"SETTINGS: TYPE({type(exc)} {exc}")
 #     def closeEvent(self, event):
 #        self.settings.setValue('window size', self.size())
 #        self.settings.setValue('window position', self.pos())
@@ -41,9 +33,10 @@ class PWVSettings(QObject):
         return self._modified
     
     def saveAll(self):
+        if not self._modified:
+            return
         self._settings.beginGroup(self._group)
         for key,val in self._cache.items():
-            print(f"{self._group}: {key} <- {val}")
             self._settings.setValue(key,val)
         self._settings.endGroup()
         self.setModified(False)
@@ -55,20 +48,25 @@ class PWVSettings(QObject):
     def setModified(self, state):
         self._modified = state
 
+    def value(self, key, defaultValue=None):
+        return self._cache.get(key, defaultValue)
+
 
 
 class PWVCliSettings(PWVSettings):
 
-    def __init__(self, app, parent=None):
-        super().__init__(app, parent)
+    def __init__(self, cliapp, parent=None):
+        super().__init__(cliapp, parent)
 
         self._group = "PwvCliApp"
 
 
 class PWVUiSettings(PWVSettings):
 
-    def __init__(self, app, parent=None):
-        super().__init__(app, parent)
+    RECENT_OPENS = "RecentOpens"
+    
+    def __init__(self, uiapp, parent=None):
+        super().__init__(uiapp, parent)
 
         self._group = "PwvUiApp"
 
@@ -78,6 +76,12 @@ class PWVUiSettings(PWVSettings):
         self.setValue(zoomKey, zoomVal)
         return zoomVal
 
+    def recentOpens(self):
+        return self._cache.get(self.RECENT_OPENS, [])
+    
+    def setRecentOpens(self, recentOpens):
+        self.setValue(self.RECENT_OPENS, recentOpens)
+    
 if __name__ == "__main__":
     import sys
     from PyQt6.QtWidgets import QApplication

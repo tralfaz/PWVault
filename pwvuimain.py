@@ -471,7 +471,10 @@ class PWVMainWin(QMainWindow):
             elif status == "DISCARD":
                 self.pwvDoc().setModified(False)
                 self.removeDocView(self)
-            
+        # Save app settings
+        stgmgr = PWVApp.instance().settings()
+        stgmgr.saveAll()
+
 ### END EVENT HANDLERS
 
 
