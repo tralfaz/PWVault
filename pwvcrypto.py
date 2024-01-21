@@ -128,7 +128,6 @@ def JSONEncryptFile(keyPath, srcPath, tgtPath):
 
     # encrypting the file
     encrypted = fernet.encrypt(original)
-    print(f"ENCRYPTED: {repr(encrypted)}")
     
     # Create JSON object
     encdstr = encrypted.decode("utf-8")
@@ -159,7 +158,6 @@ def PasswordEncodeFile(pswd, tgtPath):
 
     with open(tgtPath, 'rb') as tgtFP:
         origBytes = tgtFP.read()
-    print(f"pswd={pswd} len orig={len(origBytes)}")
 
     encBytes = cypher.encrypt(origBytes)
 
@@ -189,7 +187,6 @@ if __name__ == "__main__":
     argx = 1
     while argx < argc:
         arg = sys.argv[argx]
-        #print(f"argx={argx} arg={arg}")
 
         if arg == "keygen":
             # keygen {keypath}
@@ -198,7 +195,6 @@ if __name__ == "__main__":
                 argx += 1
                 keyPath = sys.argv[argx]
             key = GenerateKey(keyPath)
-            print(f"KEY: {repr(key)}")
             
         elif arg == "encrypt":
             # encrypt {keyPath} {srcPath} [tgtPath]
@@ -259,7 +255,6 @@ if __name__ == "__main__":
         elif arg == "mkpwkey":
             pswd = input("Password: ")
             key = MakePasswordKey(pswd)
-            print(f"Key: {key}")
 
         elif arg == "pwencode":
             if argc > argx+1:

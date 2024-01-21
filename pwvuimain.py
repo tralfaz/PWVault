@@ -72,6 +72,18 @@ class PWVMainWin(QMainWindow):
         """Return the document view associated with this top level window"""
         return self._docView
 
+    def openVaultPath(self, path):
+        actWin = QApplication.instance().findActive()
+        if not actWin.docView().pwvDoc().encoded() and \
+           not actWin.docView().pwvDoc().entries():
+            actWin.docView().openFile(path)
+        else:
+            docView = PWVDocView()
+            docView.setVisible(True)
+            docView.openFile(path)
+            self.addDocView(docView)
+        self.updateWindowsMenu()
+
     def pwvDoc(self):
         """Return the PWVDoc object belonging to the PWVDocView"""
         return self._docView.pwvDoc()
@@ -315,7 +327,6 @@ class PWVMainWin(QMainWindow):
         self._recentOpenActs = {}
         recentMenu = fileMenu.addMenu("Recent Opens")
         for path in recents:
-            print(f"RECENT: {path}")
             recentAct = QAction(path)
             recentAct.triggered.connect(partial(self._menuFileOpenRecentCB,path))
             recentMenu.addAction(recentAct)
@@ -399,14 +410,14 @@ class PWVMainWin(QMainWindow):
         dialog.setViewMode(QFileDialog.ViewMode.Detail)
         if dialog.exec():
             fnames = dialog.selectedFiles()
-            self._openVaultPath(fnames[0])
+            self.openVaultPath(fnames[0])
 
     def _menuFileOpenRecentCB(self, path):
         if not os.path.exists(path):
             QMessageBox.warning(self, "File Not Found",
                                 f"The path {path} does not exist")
             return
-        self._openVaultPath(path)
+        self.openVaultPath(path)
         
     def _menuZoomMinusCB(self):
         actWin = QApplication.instance().findActive()
@@ -415,18 +426,6 @@ class PWVMainWin(QMainWindow):
     def _menuZoomPlusCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView().zoomCards(1)
-
-    def _openVaultPath(self, path):
-        actWin = QApplication.instance().findActive()
-        if not actWin.docView().pwvDoc().encoded() and \
-           not actWin.docView().pwvDoc().entries():
-            actWin.docView().openFile(path)
-        else:
-            docView = PWVDocView()
-            docView.setVisible(True)
-            docView.openFile(path)
-            self.addDocView(docView)
-        self.updateWindowsMenu()
 
     def _saveWasDecodedDialog(self):
         title = "<H2>Was Encoded</H2>"

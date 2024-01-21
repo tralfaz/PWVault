@@ -1,7 +1,7 @@
 import os
 import sys
 
-from PyQt6.QtCore    import QSettings
+from PyQt6.QtCore    import QEvent
 from PyQt6 import QtGui
 from PyQt6.QtWidgets import QApplication
 
@@ -59,10 +59,10 @@ class PWVApp(QApplication):
         if type(fromWgt) is PWVApp:
             return
         
-        print(f"_focusChangedCB: From: {fromWgt}  To: {toWgt}")
+#        print(f"_focusChangedCB: From: {fromWgt}  To: {toWgt}")
         fromWin = fromWgt.window() if fromWgt else fromWgt
         toWin = toWgt.window() if toWgt else toWgt
-        print(f"    FromWin: {fromWin}  ToWin: {toWin}")
+#        print(f"    FromWin: {fromWin}  ToWin: {toWin}")
         self.findActive()
 
     def _loadAssets(self):
@@ -85,12 +85,6 @@ class PWVApp(QApplication):
     def _loadSettings(self):
         self._settings = PWVUiSettings(self)
         self._settings.load()
-        print(f"SETTINGS FILE: {self._settings.fileName()}")
-        try:
-            self._recentFiles = self._settings.recentOpens()
-            print(f"RECENT: {self._recentFiles}")
-        except Exception as exc:
-            print(f"SETTINGS: TYPE({type(exc)} {exc}")
 
     def _setAppWideStyles(self):
         pass
@@ -102,6 +96,26 @@ class PWVApp(QApplication):
 #              lineedit-password-character: 9679;
 #            }
 #        """)
+
+### BEGIN EVENT HANDLERS
+
+    def event(self, qev):
+        if qev.type() == QEvent.Type.FileOpen:
+            if not self._mainWin:
+                return False
+            url = qev.url()
+            if url.isLocalFile():
+                localFile = url.toLocalFile()
+                self._mainWin.openVaultPath(localFile)
+            elif url.isValid():
+                print(f"DEBUG: Valid URL {url}")
+            else:
+                print(f"DEBUG: Open File {qev.file()}")
+                self._mainWin.openVaultPath(localFile)                
+
+        return super().event(qev)
+
+### END   EVENT HANDLERS
 
 
 if __name__ == "__main__":
