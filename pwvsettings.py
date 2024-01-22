@@ -71,6 +71,8 @@ class PWVUiSettings(PWVSettings):
         self._group = "PwvUiApp"
 
     def cardZoom(self, winName, zoomDelta=0):
+        if not winName:
+            return 0
         zoomKey = "CardZoom::" + winName
         zoomVal = self._cache.get(zoomKey,0) + zoomDelta
         self.setValue(zoomKey, zoomVal)
