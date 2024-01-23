@@ -74,7 +74,7 @@ class PWVDocView(QWidget):
         self.updateEntriesCounter()
         self.updateTitle()
 
-    def arrangeDown(self):
+    def arrangeDownOld(self):
         selectedCards = []
         cardCount = len(self._cards)
         cdx = cardCount-1
@@ -90,6 +90,28 @@ class PWVDocView(QWidget):
         self._buildCards()
         for cdx in selectedCards:
             self._cards[cdx].setSelected(True)
+        self.pwvDoc().setModified(True)
+        self.updateTitle()
+
+    def arrangeDown(self):
+        selectedCards = []
+        cardCount = len(self._cards)
+        cdx = cardCount-1
+        for card in reversed(self._cards):
+            if card.selected():
+                if cdx < cardCount-1:
+                    rowEntry = self.pwvDoc().entries()[cdx]
+                    self._formLayout.removeRow(cdx)
+                    self._cards.pop(cdx)
+                    newCard = PWVCard(rowEntry)
+                    self._formLayout.insertRow(cdx+1, newCard)
+                    self._cards.insert(cdx+1,newCard)
+                    newCard.setSelected(True)
+                    self.pwvDoc().moveEntry(cdx, cdx+1)
+                    selectedCards.append(cdx+1)
+            cdx -= 1
+        if not selectedCards:
+            return
         self.pwvDoc().setModified(True)
         self.updateTitle()
 
@@ -136,7 +158,7 @@ class PWVDocView(QWidget):
         self.pwvDoc().setModified(True)
         self.updateTitle()
 
-    def arrangeUp(self):
+    def arrangeUpOld(self):
         selectedCards = []
         for cdx, card in enumerate(self._cards):
             if card.selected():
@@ -149,6 +171,25 @@ class PWVDocView(QWidget):
         self._buildCards()
         for cdx in selectedCards:
             self._cards[cdx].setSelected(True)
+        self.pwvDoc().setModified(True)
+        self.updateTitle()
+
+    def arrangeUp(self):
+        selectedCards = []
+        for cdx, card in enumerate(self._cards):
+            if card.selected():
+                if cdx > 0:
+                    rowEntry = self.pwvDoc().entries()[cdx]
+                    self._formLayout.removeRow(cdx)
+                    self._cards.pop(cdx)
+                    newCard = PWVCard(rowEntry)
+                    self._formLayout.insertRow(cdx-1, newCard)
+                    self._cards.insert(cdx-1,newCard)
+                    newCard.setSelected(True)
+                    self.pwvDoc().moveEntry(cdx, cdx-1)
+                    selectedCards.append(cdx-1)
+        if not selectedCards:
+            return
         self.pwvDoc().setModified(True)
         self.updateTitle()
 
@@ -451,7 +492,7 @@ class PWVDocView(QWidget):
         if self._entryAdded:
             self._entryAdded = False
             vbar.setValue(vbar.maximum())
-
+            
     def _getCardValues(self):
         print(f"_getCardValues RC: {len(self._cards)}")
         for card in  self._cards:
