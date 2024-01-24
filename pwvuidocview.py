@@ -76,13 +76,17 @@ class PWVDocView(QWidget):
 
     def arrangeDown(self):
         selectedCards = []
+        vsb = self._docScrollArea.verticalScrollBar()
         cardCount = len(self._cards)
         cdx = cardCount-1
         for card in reversed(self._cards):
             if card.selected():
                 if cdx < cardCount-1:
+                    cardH = card.height()
                     self._shiftCard(cdx, cdx+1)
                     selectedCards.append(cdx+1)
+                    if vsb:
+                        vsb.setSliderPosition(vsb.sliderPosition()+cardH)
             cdx -= 1
         if not selectedCards:
             return
@@ -128,11 +132,15 @@ class PWVDocView(QWidget):
 
     def arrangeUp(self):
         selectedCards = []
+        vsb = self._docScrollArea.verticalScrollBar()
         for cdx, card in enumerate(self._cards):
             if card.selected():
                 if cdx > 0:
+                    cardH = card.height()
                     self._shiftCard(cdx, cdx-1)
                     selectedCards.append(cdx-1)
+                    if vsb:
+                        vsb.setSliderPosition(vsb.sliderPosition()-cardH)
         if not selectedCards:
             return
         self.pwvDoc().setModified(True)
