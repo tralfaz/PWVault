@@ -33,7 +33,7 @@ class PWVCardField(QWidget):
         self._valFormat  = fmt
         self._valUrl     = url
         
-        self._idLBL  = QLabel(f"<big><b>{id}:</b></big>")
+        self._idLBL  = QLabel(f'<big><b><font color="white">{id}:</font></b></big>')
         if pswd:
             self._valLBL = PWVPswdLabel(val)
         else: 

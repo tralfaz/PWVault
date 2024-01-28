@@ -10,7 +10,8 @@ a = Analysis(
             ('../assets/padlock-icon.png',       'assets'),
             ('../assets/eye-open-yellow.svg',    'assets'),
             ('../assets/eye-blocked-yellow.svg', 'assets'),
-            ('../assets/search-icon-yellow.svg', 'assets')
+            ('../assets/search-icon-yellow.svg', 'assets'),
+            ('../assets/vault-icon.ico',         'assets')
            ],
     hiddenimports=[],
     hookspath=[],

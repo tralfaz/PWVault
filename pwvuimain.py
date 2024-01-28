@@ -44,7 +44,7 @@ class PWVMainWin(QMainWindow):
         self._currentDoc = None
         self._entryAdded = False
         
-        self.setWindowIcon(QtGui.QIcon("vault.jpeg"))
+        self.setWindowIcon(QtGui.QIcon("assets/vault-icon.ico"))
         self.setWindowTitle("PWVault")
         self.setGeometry(200, 500, 800, 600)
 
