@@ -13,6 +13,7 @@ class PWVApp(QApplication):
     def __init__(self):
         super().__init__(sys.argv)
 
+
         self._mainWin = None
         
         self.focusChanged.connect(self._focusChangedCB)
@@ -81,6 +82,15 @@ class PWVApp(QApplication):
         self._assets["eye-blocked-yellow"] = icon
         icon = QtGui.QIcon(os.path.join(folder, "search-icon-yellow.svg"))
         self._assets["search-icon-yellow"] = icon
+        icon = QtGui.QIcon(os.path.join(folder, "assets/vault-icon.ico"))
+        self._assets["vault-icon"] = icon
+
+        try:
+            from ctypes import windll  # Only exists on Windows.
+            myappid = 'midoma.pwvault.PWVault.1.0.0'
+            windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except ImportError:
+            pass
 
     def _loadSettings(self):
         self._settings = PWVUiSettings(self)
@@ -132,6 +142,8 @@ if __name__ == "__main__":
 
     mainWin = PWVMainWin()
     app.setMainWin(mainWin)
+
+    app.setWindowIcon(app.asset("vault-icon"))
 
     mainWin.show()
 
