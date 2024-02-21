@@ -1,7 +1,7 @@
 import getpass 
-import sys
 import re
-
+import sys
+    
 from pwvdoc import PWVDoc
 from pwvdoc import PWVKey
 from pwvdoc import PWVDocExc
@@ -27,9 +27,6 @@ def FormatEntry(entry, opts):
         print(f"NOTES:\n{entry.get(PWVKey.NOTES, '')}")
     print()
     
-
-
-
 
 def Usage(errmsg):
     if errmsg:
@@ -62,21 +59,21 @@ optFields  = ["id", "url"]
 optIdFilter = None
 
     
-def ParseArgs():
+def ParseArgs(argv):
     opts = { "pwvpath": None,
-            "fields": ["id","url"],
-            "idfilter": None }
+             "fields": ["id","url"],
+             "idfilter": None }
 
-    argc = len(sys.argv)
+    argc = len(argv)
     argx = 1
     while argx < argc:
-        arg = sys.argv[argx]
+        arg = argv[argx]
         if arg == "--fields":
             optFields = []
             if argx < argc-2:
                 argx += 1
                 validFields = ["id", "url", "user", "pswd", "notes", "all"]
-                optFields = sys.argv[argx].split(",")
+                optFields = argv[argx].split(",")
                 for fld in optFields[:]:
                     print(f"FLD: {fld}")
                     if fld not in validFields:
@@ -92,7 +89,7 @@ def ParseArgs():
         elif arg == "--idfilter":
             if argx < argc-2:
                 argx += 1
-                regex = sys.argv[argx]
+                regex = argv[argx]
                 try:
                     opts["idfilter"] = re.compile(regex)
                 except re.error as rex:
@@ -115,9 +112,8 @@ def ParseArgs():
     return opts
 
 
-if __name__ == "__main__":
-   
-    opts = ParseArgs()
+def CLIMain(argv):
+    opts = ParseArgs(argv)
 
     pwvpath = opts.get("pwvpath")
     if not pwvpath:
@@ -140,3 +136,7 @@ if __name__ == "__main__":
             FormatEntry(entry, opts)
         elif not idFilter:
             FormatEntry(entry, opts)
+
+
+if __name__ == "__main__":
+    CLIMain(sys.argv)

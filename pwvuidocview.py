@@ -36,6 +36,50 @@ class CardsScrollArea(QScrollArea):
                 vsb.setValue(0)
 
 
+_CARD_STYLE_DARK = """
+          PWVCard[selected="false"] {
+            background-color: black;
+            border: 5px solid gray;
+            border-radius: 0px;
+          }
+          PWVCard[selected="true"] {
+            background-color: rgba(100,100,100, 0.4);
+            border: 5px solid yellow;
+            border-radius: 10px;
+          }
+
+          PWVCard QGroupBox {
+            padding: 3 0px;
+          }
+          PWVCard QGroupBox::title {
+           subcontrol-position: top center;
+           padding-bottom: 3px;
+         } """
+
+_CARD_STYLE_LIGHT = """
+          PWVCard[selected="false"] {
+            background-color: white;
+            border: 5px solid gray;
+            border-radius: 0px;
+          }
+          PWVCard[selected="true"] {
+            background-color: rgba(100,100,100, 0.4);
+            border: 5px solid blue;
+            border-radius: 10px;
+          }
+
+          PWVCard QGroupBox {
+            padding: 3 0px;
+          }
+          PWVCard QGroupBox::title {
+           subcontrol-position: top center;
+           padding-bottom: 3px;
+          }
+         PWVCardField {
+           color: black;
+         }
+"""
+
 
 class PWVDocView(QWidget):
 
@@ -410,25 +454,11 @@ class PWVDocView(QWidget):
         scroll.setWidgetResizable(True)
         scroll.verticalScrollBar().rangeChanged.connect(self._docScrollRangeCB)
         scroll.setWidget(cardsForm)
-        cardsForm.setStyleSheet("""
-          PWVCard[selected="false"] {
-            background-color: black;
-            border: 5px solid gray;
-            border-radius: 0px;
-          }
-          PWVCard[selected="true"] {
-            background-color: rgba(100,100,100, 0.4);
-            border: 5px solid yellow;
-            border-radius: 10px;
-          }
-
-          PWVCard QGroupBox {
-            padding: 3 0px;
-          }
-          PWVCard QGroupBox::title {
-           subcontrol-position: top center;
-           padding-bottom: 3px;
-         } """)
+        theme = PWVApp.instance().settings().appViewTheme()
+        if theme == "Dark":
+            cardsForm.setStyleSheet(_CARD_STYLE_DARK)
+        elif theme == "Light":
+            cardsForm.setStyleSheet(_CARD_STYLE_LIGHT)
 
         self._addEntryBTN = QPushButton("+")
         self._addEntryBTN.clicked.connect(self.addEntry)

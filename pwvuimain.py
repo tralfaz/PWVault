@@ -304,6 +304,7 @@ class PWVMainWin(QMainWindow):
         self._encodeMenu.addAction(self._genPswdAct)
 
         # View menu
+        theme = PWVApp.instance().settings().appViewTheme()
         self._viewMenu = self.menuBar().addMenu("View")
         self._zoomPlusAct = QAction("Zoom In", self)
         self._zoomPlusAct.setStatusTip("Increase Font Size")
@@ -315,7 +316,20 @@ class PWVMainWin(QMainWindow):
         self._zoomMinusAct.setShortcut(QKeySequence("Ctrl+-"))
         self._zoomMinusAct.triggered.connect(self._menuZoomMinusCB)
         self._viewMenu.addAction(self._zoomMinusAct)
-
+        self._themeMenu = self._viewMenu.addMenu("Theme")
+        self._themeLightAct = QAction("Light", self)
+        self._themeLightAct.setStatusTip("Light color theme")
+        self._themeLightAct.setCheckable(True)
+        self._themeLightAct.setChecked(theme == "Light")
+        self._themeLightAct.triggered.connect(self._menuViewThemeLightCB)
+        self._themeMenu.addAction(self._themeLightAct)
+        self._themeDarkAct = QAction("Dark", self)
+        self._themeDarkAct.setCheckable(True)
+        self._themeDarkAct.setChecked(theme == "Dark")
+        self._themeDarkAct.setStatusTip("Dark color theme")
+        self._themeDarkAct.triggered.connect(self._menuViewThemeDarkCB)
+        self._themeMenu.addAction(self._themeDarkAct)
+        
         # Windows menu
         self._winMenu = self.menuBar().addMenu("Windows")
 
@@ -419,6 +433,14 @@ class PWVMainWin(QMainWindow):
             return
         self.openVaultPath(path)
         
+    def _menuViewThemeDarkCB(self):
+        print("_menuViewThemeDarkCB")
+        PWVApp.instance().settings().setAppViewTheme("Dark")
+        
+    def _menuViewThemeLightCB(self):
+        print("_menuViewThemeLightCB")
+        PWVApp.instance().settings().setAppViewTheme("Light")
+        
     def _menuZoomMinusCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView().zoomCards(-1)
@@ -479,6 +501,9 @@ class PWVMainWin(QMainWindow):
 
 if __name__ == "__main__":
     from pwvuiapp import PWVApp
+
+    with open("/Users/mdm/pwvault.log", "w") as logFP:
+        print(f"{sys.argv}", file=logFP)
 
     app = PWVApp()
 

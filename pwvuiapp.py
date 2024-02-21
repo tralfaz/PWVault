@@ -1,8 +1,8 @@
 import os
 import sys
 
-from PyQt6.QtCore    import QEvent
 from PyQt6 import QtGui
+from PyQt6.QtCore    import QEvent
 from PyQt6.QtWidgets import QApplication
 
 from pwvsettings import PWVUiSettings
@@ -119,6 +119,13 @@ class PWVApp(QApplication):
 
 
 if __name__ == "__main__":
+    with open("/Users/mdm/pwvault.log", "w") as logFP:
+        if len(sys.argv) > 1 and sys.argv[1] == "--cli":
+            from pwvcliapp import CLIMain
+            argv = [sys.argv[0]] + sys.argv[2:] 
+            CLIMain(argv)
+            sys.exit(0)
+            
     from pwvuimain import PWVMainWin
     
     app = PWVApp()

@@ -63,12 +63,17 @@ class PWVCliSettings(PWVSettings):
 
 class PWVUiSettings(PWVSettings):
 
-    RECENT_OPENS = "RecentOpens"
+    APP_VIEW_THEME = "AppViewTheme"
+    RECENT_OPENS   = "RecentOpens"
     
     def __init__(self, uiapp, parent=None):
         super().__init__(uiapp, parent)
 
         self._group = "PwvUiApp"
+
+    def appViewTheme(self):
+        theme = self._cache.get(self.APP_VIEW_THEME, "Dark")
+        return theme
 
     def cardZoom(self, winName, zoomDelta=0):
         if not winName:
@@ -81,6 +86,12 @@ class PWVUiSettings(PWVSettings):
     def recentOpens(self):
         return self._cache.get(self.RECENT_OPENS, [])
     
+    def setAppViewTheme(self, theme):
+        if theme.lower() == "light":
+            self.setValue(self.APP_VIEW_THEME, "Light")
+        elif theme.lower() == "dark":
+            self.setValue(self.APP_VIEW_THEME, "Dark")
+
     def setRecentOpens(self, recentOpens):
         self.setValue(self.RECENT_OPENS, recentOpens)
     
