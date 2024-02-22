@@ -2,7 +2,7 @@
 #
 # PyInstaller: https://pyinstaller.org/en/stable/index.html
 # ImageToIcons:
-s#   https://apps.apple.com/us/app/image2icon-make-your-icons/id992115977?mt=12
+#   https://apps.apple.com/us/app/image2icon-make-your-icons/id992115977?mt=12
 #
 set -x
 
