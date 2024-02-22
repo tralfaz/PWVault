@@ -82,7 +82,10 @@ class PWVApp(QApplication):
         self._assets["eye-blocked-yellow"] = icon
         icon = QtGui.QIcon(os.path.join(folder, "search-icon-yellow.svg"))
         self._assets["search-icon-yellow"] = icon
-        icon = QtGui.QIcon(os.path.join(folder, "assets/vault-icon.ico"))
+        if sys.platform[0:3] == "win":
+            icon = QtGui.QIcon(os.path.join(folder, "assets/vault-icon.ico"))
+        else:
+            icon = QtGui.QIcon(os.path.join(folder, "assets/vault-icon.png"))
         self._assets["vault-icon"] = icon
 
         try:
@@ -129,12 +132,11 @@ class PWVApp(QApplication):
 
 
 if __name__ == "__main__":
-    with open("/Users/mdm/pwvault.log", "w") as logFP:
-        if len(sys.argv) > 1 and sys.argv[1] == "--cli":
-            from pwvcliapp import CLIMain
-            argv = [sys.argv[0]] + sys.argv[2:] 
-            CLIMain(argv)
-            sys.exit(0)
+    if len(sys.argv) > 1 and sys.argv[1] == "--cli":
+        from pwvcliapp import CLIMain
+        argv = [sys.argv[0]] + sys.argv[2:] 
+        CLIMain(argv)
+        sys.exit(0)
             
     from pwvuimain import PWVMainWin
     
