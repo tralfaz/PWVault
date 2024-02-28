@@ -436,11 +436,15 @@ class PWVMainWin(QMainWindow):
     def _menuViewThemeDarkCB(self):
         print("_menuViewThemeDarkCB")
         PWVApp.instance().settings().setAppViewTheme("Dark")
+        self._viewTheme = "Dark"
+        self._themeChange()
         
     def _menuViewThemeLightCB(self):
         print("_menuViewThemeLightCB")
         PWVApp.instance().settings().setAppViewTheme("Light")
-        
+        self._viewTheme = "Light"
+        self._themeChange()
+
     def _menuZoomMinusCB(self):
         actWin = QApplication.instance().findActive()
         actWin.docView().zoomCards(-1)
@@ -476,6 +480,9 @@ class PWVMainWin(QMainWindow):
         else:
             return "Cancel"
 
+    def _themeChange(self):
+        app = PWVApp.instance()
+        
     def _winMenuCB(self, docView):
 #        print(f"_winMenuCB {docView}")
         docView.activateWindow()

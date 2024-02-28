@@ -54,31 +54,47 @@ _CARD_STYLE_DARK = """
           PWVCard QGroupBox::title {
            subcontrol-position: top center;
            padding-bottom: 3px;
-         } """
+         }
+         PWVCardField QLabel {
+           color: white;
+         }
+         """
 
 _CARD_STYLE_LIGHT = """
-          PWVCard[selected="false"] {
-            background-color: white;
-            border: 5px solid gray;
-            border-radius: 0px;
-          }
-          PWVCard[selected="true"] {
-            background-color: rgba(100,100,100, 0.4);
-            border: 5px solid blue;
-            border-radius: 10px;
-          }
-
-          PWVCard QGroupBox {
-            padding: 3 0px;
-          }
-          PWVCard QGroupBox::title {
+         PWVCard[selected="false"] {
+           background-color: #e3d8c5;
+           border: 5px solid gray;
+           border-radius: 0px;
+         }
+         PWVCard[selected="true"] {
+           background-color: rgba(100,100,100, 0.4);
+           border: 5px solid blue;
+           border-radius: 10px;
+         }
+         PWVCard QGroupBox {
+           color:            #ff000000;
+           background-color: #ffe0e0e0;
+           padding:          3 0px;
+         }
+         PWVCard QGroupBox::title {
            subcontrol-position: top center;
            padding-bottom: 3px;
-          }
-         PWVCardField {
+         }
+         PWVCard QTextEdit {
+           color:            #ff000000;
+           background-color: #fff0f0f0;
+         }
+         PWVCard QPushButton {
+           color:            #ff000000;
+           background-color: #ffe0e0e0;
+         }
+         PWVCardField QLabel {
            color: black;
          }
-"""
+         PWVCardField PWVPswdLabel {
+           color: black;
+         }
+         """
 
 
 class PWVDocView(QWidget):
@@ -147,8 +163,6 @@ class PWVDocView(QWidget):
                 selectedCards.append(card)
         if not selectedCards:
             return
-        vsb = self._docScrollArea.verticalScrollBar()
-        if vsb:
             vsb.setValue(vsb.maximum())
         self.pwvDoc().setModified(True)
         self.updateTitle()

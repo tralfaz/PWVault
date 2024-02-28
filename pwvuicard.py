@@ -33,7 +33,8 @@ class PWVCardField(QWidget):
         self._valFormat  = fmt
         self._valUrl     = url
         
-        self._idLBL  = QLabel(f'<big><b><font color="white">{id}:</font></b></big>')
+#        self._idLBL  = QLabel(f'<big><b><font color="white">{id}:</font></b></big>')
+        self._idLBL  = QLabel(f'<big><b>{id}:</b></big>')
         if pswd:
             self._valLBL = PWVPswdLabel(val)
         else: 
@@ -170,7 +171,8 @@ class PWVCard(QFrame):
 
         eid = entry.get(PWVKey.ID,"<I>Missing: ID</I>")
         self._idCF = PWVCardField(id="ID", val=eid, ctrls="CE",
-                                  fmt='<b><font color="white">{0}</font></b>')
+                                  fmt='<b>{0}</b>')
+#                                  fmt='<b><font color="white">{0}</font></b>')                                 
         self._idCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.ID)
         vbox.addWidget(self._idCF)
         
@@ -180,7 +182,8 @@ class PWVCard(QFrame):
         vbox.addWidget(self._urlCF)
         
         euser = entry.get(PWVKey.USER, "<I>Missing: USER</I>")
-        upfmt = '<b><font color="yellow">{0}</font></b>'
+#        upfmt = '<b><font color="yellow">{0}</font></b>'
+        upfmt = '<b>{0}</b>'
         self._userCF = PWVCardField(id="USER", val=euser, fmt=upfmt, ctrls="CE")
         self._userCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.USER)
         vbox.addWidget(self._userCF)

@@ -13,13 +13,12 @@ class PWVApp(QApplication):
     def __init__(self):
         super().__init__(sys.argv)
 
-
         self._mainWin = None
         
         self.focusChanged.connect(self._focusChangedCB)
 
-        self._loadAssets()
         self._loadSettings()
+        self._loadAssets()
         self._setAppWideStyles()
 
     def asset(self, name):
@@ -71,8 +70,11 @@ class PWVApp(QApplication):
         folder = os.path.join(folder, "assets")
         self._assets = {}
         icon = QtGui.QIcon(os.path.join(folder, "copy-button-icon.png"))
-        self._assets["copy-button-icon"] = icon
-        icon = QtGui.QIcon(os.path.join(folder, "edit-button-icon.png"))
+        self._assets["dark-copy-button-icon"] = icon
+        icon = QtGui.QIcon(os.path.join(folder, "copy-black.svg"))
+        self._assets["light-copy-button-icon"] = icon
+#        icon = QtGui.QIcon(os.path.join(folder, "edit-button-icon.png"))
+        icon = QtGui.QIcon(os.path.join(folder, "edit_red3.svg"))
         self._assets["edit-button-icon"] = icon
         icon = QtGui.QIcon(os.path.join(folder, "padlock-icon.png"))
         self._assets["padlock-icon"] = icon
@@ -80,6 +82,10 @@ class PWVApp(QApplication):
         self._assets["eye-open-yellow"] = icon
         icon = QtGui.QIcon(os.path.join(folder, "eye-blocked-yellow.svg"))
         self._assets["eye-blocked-yellow"] = icon
+        icon = QtGui.QIcon(os.path.join(folder, "eye-open-black.svg"))
+        self._assets["eye-open-black"] = icon
+        icon = QtGui.QIcon(os.path.join(folder, "eye-blocked-black.svg"))
+        self._assets["eye-blocked-black"] = icon
         icon = QtGui.QIcon(os.path.join(folder, "search-icon-yellow.svg"))
         self._assets["search-icon-yellow"] = icon
         if sys.platform[0:3] == "win":
@@ -87,6 +93,17 @@ class PWVApp(QApplication):
         else:
             icon = QtGui.QIcon(os.path.join(folder, "assets/vault-icon.png"))
         self._assets["vault-icon"] = icon
+
+        # set entries for dark/light themes
+        theme = self.settings().appViewTheme()
+        if theme == "Light":
+            self._assets["copy-button-icon"] = self._assets["light-copy-button-icon"]
+            self._assets["eye-open"] = self._assets["eye-open-black"]
+            self._assets["eye-blocked"] = self._assets["eye-blocked-black"]
+        else:
+            self._assets["copy-button-icon"] = self._assets["dark-copy-button-icon"]
+            self._assets["eye-open"] = self._assets["eye-open-yellow"]
+            self._assets["eye-blocked"] = self._assets["eye-blocked-yellow"]
 
         try:
             from ctypes import windll  # Only exists on Windows.

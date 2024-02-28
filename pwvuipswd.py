@@ -40,8 +40,8 @@ class PWVPswdLineEdit(QLineEdit):
 
         self._hideText = hideText
         
-        self.eyeOpenIcon = PWVApp.instance().asset("eye-open-yellow")
-        self.eyeBlockedIcon = PWVApp.instance().asset("eye-blocked-yellow")
+        self.eyeOpenIcon = PWVApp.instance().asset("eye-open")
+        self.eyeBlockedIcon = PWVApp.instance().asset("eye-blocked")
 
         if hideText:
             self.setEchoMode(QLineEdit.EchoMode.Password)
