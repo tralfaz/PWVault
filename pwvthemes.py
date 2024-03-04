@@ -29,6 +29,25 @@ def AffectiveTheme(wgt):
             return "Light"
 
 
+def SetColorTheme(wgt, theme):
+    theme = theme.lower()
+    if sys.platform == "darwin":
+        if theme == "dark":
+            DarkPaletteApple(wgt)
+        elif theme == "light":
+            LightPaletteApple(wgt)
+    elif sys.platform[0:3] == "win":
+        if theme == "dark":
+            DarkPaletteWindows(wgt)
+        elif theme == "light":
+            LightPaletteWindows(wgt)
+    elif sys.platform == "linux":
+        if theme == "dark":
+            DarkPaletteLinux(wgt)
+        elif theme == "light":
+            LightPaletteLinux(wgt)
+
+
 def DarkPaletteApple(wgt):
     pal = wgt.palette()
     cg = QPalette.ColorGroup.Active

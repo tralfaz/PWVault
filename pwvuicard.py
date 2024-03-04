@@ -22,6 +22,19 @@ from pwvuipswd import PWVPswdLabel
 from pwvuipswd import PWVPswdLineEdit
 
 
+class PWVCFCopyButton(QPushButton):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFlat(True)
+
+
+class PWVCFEditButton(QPushButton):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFlat(True)
+
 
 class PWVCardField(QWidget):
 
@@ -53,17 +66,11 @@ class PWVCardField(QWidget):
             self._valLE  = QLineEdit()
         self._valLE.setVisible(False)
         self._valLE.editingFinished.connect(self._editDoneCB)
-        icon = PWVApp.instance().asset("copy-button-icon")
-        self._copyBTN = QPushButton()
-        self._copyBTN.setFlat(True)
-        self._copyBTN.setIcon(icon)
+        self._copyBTN = PWVCFCopyButton()
         self._copyBTN.clicked.connect(self._copyCB)
         self._copyBTN.setVisible('C' in ctrls)
             
-        icon = PWVApp.instance().asset("edit-button-icon")
-        self._editBTN = QPushButton()
-        self._editBTN.setFlat(True)
-        self._editBTN.setIcon(icon)
+        self._editBTN = PWVCFEditButton()
         self._editBTN.clicked.connect(self._editCB)
         self._editBTN.setVisible('E' in ctrls)
 
@@ -150,6 +157,14 @@ class PWVCardField(QWidget):
 # END PWVCardField
 
 
+class PWVCardExpandButton(QPushButton):
+
+    def __init__(self, parent=None):
+        super().__init__()
+        self.setFlat(True)
+        self.setProperty("expanded", "false")
+
+
 class PWVCard(QFrame):
 
     def __init__(self, entry):
@@ -172,7 +187,7 @@ class PWVCard(QFrame):
         eid = entry.get(PWVKey.ID,"<I>Missing: ID</I>")
         self._idCF = PWVCardField(id="ID", val=eid, ctrls="CE",
                                   fmt='<b>{0}</b>')
-#                                  fmt='<b><font color="white">{0}</font></b>')                                 
+
         self._idCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.ID)
         vbox.addWidget(self._idCF)
         
@@ -182,7 +197,6 @@ class PWVCard(QFrame):
         vbox.addWidget(self._urlCF)
         
         euser = entry.get(PWVKey.USER, "<I>Missing: USER</I>")
-#        upfmt = '<b><font color="yellow">{0}</font></b>'
         upfmt = '<b>{0}</b>'
         self._userCF = PWVCardField(id="USER", val=euser, fmt=upfmt, ctrls="CE")
         self._userCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.USER)
@@ -204,7 +218,7 @@ class PWVCard(QFrame):
         expVbox.addWidget(self._notesTXT)
         vbox.addWidget(self._notesGRP)
         
-        self._expandBTN = QPushButton("V")
+        self._expandBTN = PWVCardExpandButton()
         self._expandBTN.clicked.connect(self._expandCB)
         vbox.addWidget(self._expandBTN)
         
@@ -301,13 +315,16 @@ class PWVCard(QFrame):
                 self.window().docView().selectExtend(self)
 
     def _expandCB(self):
-        if self._expanded:
-            self._expandBTN.setText("V")
+        if self._expandBTN.property("expanded") == "true":
+            self._notesGRP.setVisible(False)
+            self._expandBTN.setProperty("expanded", "false")
         else:
-            self._expandBTN.setText("^")
-        self._expanded = not self._expanded
-        self._notesGRP.setVisible(self._expanded)
-        
+            self._notesGRP.setVisible(True)
+            self._expandBTN.setProperty("expanded", "true")
+        self._expandBTN.style().unpolish(self._expandBTN)
+        self._expandBTN.style().polish(self._expandBTN)
+        self._expandBTN.update()
+
     
 
 class PWVEncodedCard(QFrame):

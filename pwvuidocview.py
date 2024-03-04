@@ -1,3 +1,5 @@
+import os
+
 from PyQt6           import QtCore
 from PyQt6.QtWidgets import QCompleter
 from PyQt6.QtWidgets import QFileDialog
@@ -36,67 +38,6 @@ class CardsScrollArea(QScrollArea):
                 vsb.setValue(0)
 
 
-_CARD_STYLE_DARK = """
-          PWVCard[selected="false"] {
-            background-color: black;
-            border: 5px solid gray;
-            border-radius: 0px;
-          }
-          PWVCard[selected="true"] {
-            background-color: rgba(100,100,100, 0.4);
-            border: 5px solid yellow;
-            border-radius: 10px;
-          }
-
-          PWVCard QGroupBox {
-            padding: 3 0px;
-          }
-          PWVCard QGroupBox::title {
-           subcontrol-position: top center;
-           padding-bottom: 3px;
-         }
-         PWVCardField QLabel {
-           color: white;
-         }
-         """
-
-_CARD_STYLE_LIGHT = """
-         PWVCard[selected="false"] {
-           background-color: #e3d8c5;
-           border: 5px solid gray;
-           border-radius: 0px;
-         }
-         PWVCard[selected="true"] {
-           background-color: rgba(100,100,100, 0.4);
-           border: 5px solid blue;
-           border-radius: 10px;
-         }
-         PWVCard QGroupBox {
-           color:            #ff000000;
-           background-color: #ffe0e0e0;
-           padding:          3 0px;
-         }
-         PWVCard QGroupBox::title {
-           subcontrol-position: top center;
-           padding-bottom: 3px;
-         }
-         PWVCard QTextEdit {
-           color:            #ff000000;
-           background-color: #fff0f0f0;
-         }
-         PWVCard QPushButton {
-           color:            #ff000000;
-           background-color: #ffe0e0e0;
-         }
-         PWVCardField QLabel {
-           color: black;
-         }
-         PWVCardField PWVPswdLabel {
-           color: black;
-         }
-         """
-
-
 class PWVDocView(QWidget):
 
     def __init__(self, pwvDoc=None):
@@ -115,6 +56,7 @@ class PWVDocView(QWidget):
         self._entryAdded = False
 
         self._cards = []
+        self._cardStyles = {}
         self._lastCardSelected = None
         
         self._buildDocWindow()
@@ -209,6 +151,12 @@ class PWVDocView(QWidget):
         docPath = self._pwvDoc.fileName()
         return stgmgr.cardZoom(docPath)
 
+    def changeTheme(self, theme):
+        self._cardsForm.setStyleSheet(self._cardStyle(theme))
+        self._cardsForm.style().unpolish(self)
+        self._cardsForm.style().polish(self)
+        self._cardsForm.update()
+            
     def decryptDoc(self):
         if not self.pwvDoc().encoded():
             QMessageBox.information(self, "Unecoded", "Vault is not encoded.")
@@ -418,6 +366,22 @@ class PWVDocView(QWidget):
         self.updateEntriesCounter()
         self.updateTitle()
 
+    def _cardStyle(self, theme):
+        theme = theme.lower()
+        css = self._cardStyles.get(theme)
+        if css:
+            return css
+        
+        assetsPath = os.path.dirname(__file__)
+        assetsPath = os.path.join(assetsPath, "assets") + os.path.sep
+        if theme == "light":
+            cssfmt = _CARD_STYLE_LIGHT
+        else:
+            cssfmt = _CARD_STYLE_DARK
+        css = str.format(cssfmt, assets=assetsPath)
+        self._cardStyles[theme] = css
+        return css    
+        
     def _clearCards(self):
         self._cards.clear()
         for cdx in range(self._formLayout.count()-1, -1, -1):
@@ -461,7 +425,7 @@ class PWVDocView(QWidget):
             
         self._entriesGRP = QGroupBox(f"Entries: {nents}")
  
-        cardsForm = QWidget()
+        self._cardsForm = cardsForm = QWidget()
         cardsForm.setLayout(self._formLayout)
         
         self._docScrollArea = scroll = CardsScrollArea()
@@ -469,10 +433,7 @@ class PWVDocView(QWidget):
         scroll.verticalScrollBar().rangeChanged.connect(self._docScrollRangeCB)
         scroll.setWidget(cardsForm)
         theme = PWVApp.instance().settings().appViewTheme()
-        if theme == "Dark":
-            cardsForm.setStyleSheet(_CARD_STYLE_DARK)
-        elif theme == "Light":
-            cardsForm.setStyleSheet(_CARD_STYLE_LIGHT)
+        cardsForm.setStyleSheet(self._cardStyle(theme))
 
         self._addEntryBTN = QPushButton("+")
         self._addEntryBTN.clicked.connect(self.addEntry)
@@ -550,3 +511,87 @@ class PWVDocView(QWidget):
 
 ### END EVENT HANDLERS
         
+
+
+_CARD_STYLE_DARK = """
+          PWVCard[selected="false"] {{
+            background-color: black;
+            border: 5px solid gray;
+            border-radius: 0px;
+          }}
+          PWVCard[selected="true"] {{
+            background-color: rgba(100,100,100, 0.4);
+            border: 5px solid yellow;
+            border-radius: 10px;
+          }}
+          PWVCard QGroupBox {{
+            padding: 3 0px;
+          }}
+          PWVCard QGroupBox::title {{
+           subcontrol-position: top center;
+           padding-bottom: 3px;
+         }}
+         PWVCard PWVCFCopyButton {{
+           qproperty-icon: url({assets}copy-yellow.svg);
+         }}
+         PWVCard PWVCFEditButton {{
+           qproperty-icon: url({assets}edit-red.svg);
+         }}
+         PWVCardExpandButton[expanded="false"] {{
+           qproperty-icon: url({assets}more-yellow.svg);
+         }}
+         PWVCardExpandButton[expanded="true"] {{
+           qproperty-icon: url({assets}less-yellow.svg);
+         }}
+         PWVCardField QLabel {{
+           color: white;
+         }}
+         """
+
+_CARD_STYLE_LIGHT = """
+         PWVCard[selected="false"] {{
+           background-color: #e3d8c5;
+           border: 5px solid gray;
+           border-radius: 0px;
+         }}
+         PWVCard[selected="true"] {{
+           background-color: rgba(100,100,100, 0.4);
+           border: 5px solid blue;
+           border-radius: 10px;
+         }}
+         PWVCard QGroupBox {{
+           color:            #ff000000;
+           background-color: #ffe0e0e0;
+           padding:          3 0px;
+         }}
+         PWVCard QGroupBox::title {{
+           subcontrol-position: top center;
+           padding-bottom: 3px;
+         }}
+         PWVCard QTextEdit {{
+           color:            #ff000000;
+           background-color: #fff0f0f0;
+         }}
+         PWVCard QPushButton {{
+           color:            #ff000000;
+           background-color: #ffe0e0e0;
+         }}
+         PWVCardField QLabel {{
+           color: black;
+         }}
+         PWVCard PWVCFCopyButton {{
+           qproperty-icon: url({assets}copy-black.svg);
+         }}
+         PWVCard PWVCFEditButton {{
+           qproperty-icon: url({assets}edit-red.svg);
+         }}
+         PWVCardExpandButton[expanded="false"] {{
+           qproperty-icon: url({assets}more-black.svg);
+         }}
+         PWVCardExpandButton[expanded="true"] {{
+           qproperty-icon: url({assets}less-black.svg);
+         }}
+         PWVCardField PWVPswdLabel {{
+           color: black;
+         }}
+         """

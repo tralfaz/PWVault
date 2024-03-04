@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import QWidget
 
 from pwvdoc       import PWVDoc
 from pwvdoc       import PWVKey
+from pwvthemes    import SetColorTheme
 from pwvuiapp     import PWVApp
 from pwvuicard    import PWVCard
 from pwvuidocview import PWVDocView
@@ -434,14 +435,14 @@ class PWVMainWin(QMainWindow):
         self.openVaultPath(path)
         
     def _menuViewThemeDarkCB(self):
-        print("_menuViewThemeDarkCB")
         PWVApp.instance().settings().setAppViewTheme("Dark")
+        self._themeLightAct.setChecked(False)
         self._viewTheme = "Dark"
         self._themeChange()
         
     def _menuViewThemeLightCB(self):
-        print("_menuViewThemeLightCB")
         PWVApp.instance().settings().setAppViewTheme("Light")
+        self._themeDarkAct.setChecked(False)
         self._viewTheme = "Light"
         self._themeChange()
 
@@ -482,6 +483,11 @@ class PWVMainWin(QMainWindow):
 
     def _themeChange(self):
         app = PWVApp.instance()
+        SetColorTheme(app, self._viewTheme)
+        for win in self._docWins:
+            print(f"_themeChange: {win = }")
+            SetColorTheme(win, self._viewTheme)
+            win.docView().changeTheme(self._viewTheme)
         
     def _winMenuCB(self, docView):
 #        print(f"_winMenuCB {docView}")

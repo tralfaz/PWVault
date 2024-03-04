@@ -58,24 +58,25 @@ class PWVApp(QApplication):
     def _focusChangedCB(fromWgt, toWgt):
         if type(fromWgt) is PWVApp:
             return
-        
-#        print(f"_focusChangedCB: From: {fromWgt}  To: {toWgt}")
+
         fromWin = fromWgt.window() if fromWgt else fromWgt
         toWin = toWgt.window() if toWgt else toWgt
-#        print(f"    FromWin: {fromWin}  ToWin: {toWin}")
         self.findActive()
 
     def _loadAssets(self):
         folder = os.path.dirname(__file__)
         folder = os.path.join(folder, "assets")
         self._assets = {}
-        icon = QtGui.QIcon(os.path.join(folder, "copy-button-icon.png"))
+        icon = QtGui.QIcon(os.path.join(folder, "copy-yellow.svg"))
         self._assets["dark-copy-button-icon"] = icon
         icon = QtGui.QIcon(os.path.join(folder, "copy-black.svg"))
         self._assets["light-copy-button-icon"] = icon
-#        icon = QtGui.QIcon(os.path.join(folder, "edit-button-icon.png"))
-        icon = QtGui.QIcon(os.path.join(folder, "edit_red3.svg"))
+        icon = QtGui.QIcon(os.path.join(folder, "edit-red.svg"))
         self._assets["edit-button-icon"] = icon
+        
+        icon = QtGui.QIcon(os.path.join(folder, "more-yellow.svg"))
+        self._assets["more-yellow"] = icon
+
         icon = QtGui.QIcon(os.path.join(folder, "padlock-icon.png"))
         self._assets["padlock-icon"] = icon
         icon = QtGui.QIcon(os.path.join(folder, "eye-open-yellow.svg"))
