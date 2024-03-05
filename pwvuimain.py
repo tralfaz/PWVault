@@ -74,9 +74,7 @@ class PWVMainWin(QMainWindow):
         return self._docView
 
     def openVaultPath(self, path):
-        logging.debug(f"openVaultPath: {path=}")
         actWin = QApplication.instance().findActive()
-        logging.debug(f"openVaultPath: {actWin=}")
         if actWin is None and len(self._docWins) > 0:
             actWin = self._docWins[-1]
         if actWin and not actWin.docView().pwvDoc().encoded() and \
