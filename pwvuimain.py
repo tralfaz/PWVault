@@ -74,8 +74,12 @@ class PWVMainWin(QMainWindow):
         return self._docView
 
     def openVaultPath(self, path):
+        logging.debug(f"openVaultPath: {path=}")
         actWin = QApplication.instance().findActive()
-        if not actWin.docView().pwvDoc().encoded() and \
+        logging.debug(f"openVaultPath: {actWin=}")
+        if actWin is None and len(self._docWins) > 0:
+            actWin = self._docWins[-1]
+        if actWin and not actWin.docView().pwvDoc().encoded() and \
            not actWin.docView().pwvDoc().entries():
             actWin.docView().openFile(path)
         else:
@@ -349,7 +353,11 @@ class PWVMainWin(QMainWindow):
 
     def _decodeVaultCB(self):
         actWin = QApplication.instance().findActive()
-        actWin.docView().decryptDoc()
+        if not actWin:
+            if len(self._docWins) > 0:
+                actWin = self._docWins[-1]
+        if actWin:
+            actWin.docView().decryptDoc()
 
     def _docScrollRangeCB(self, xr, yr):
 #        print("FORM GEOM: ", self._formLayout.contentsRect())

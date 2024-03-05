@@ -27,7 +27,7 @@ class PWVApp(QApplication):
     def findActive(self):
         actwgt = None
         for tlwgt in QApplication.topLevelWidgets():
-#            print(f"TOP WGT: {tlwgt.windowTitle()}  Active: {tlwgt.isActiveWindow()}")
+#            logging.debug(f"TOP WGT: {tlwgt} {tlwgt.windowTitle()}  Active: {tlwgt.isActiveWindow()}")
             if tlwgt.isActiveWindow():
                 actwgt = tlwgt
         return actwgt
@@ -150,6 +150,10 @@ class PWVApp(QApplication):
 
 
 if __name__ == "__main__":
+#    import logging
+#    logging.basicConfig(filename='/Users/mdm/pwvault.log', encoding='utf-8',
+#                        level=logging.DEBUG)
+
     if len(sys.argv) > 1 and sys.argv[1] == "--cli":
         from pwvcliapp import CLIMain
         argv = [sys.argv[0]] + sys.argv[2:] 
