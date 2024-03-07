@@ -1,5 +1,6 @@
 from functools import partial
 import os
+import logging
 import sys
 
 from PyQt6 import QtCore
@@ -44,7 +45,8 @@ class PWVMainWin(QMainWindow):
         
         self._currentDoc = None
         self._entryAdded = False
-        
+        self._lastOpenDirPath = QtCore.QDir.homePath()
+
         self.setWindowIcon(QtGui.QIcon("assets/vault-icon.ico"))
         self.setWindowTitle("PWVault")
         self.setGeometry(200, 500, 800, 600)
@@ -84,6 +86,7 @@ class PWVMainWin(QMainWindow):
             docView = PWVDocView()
             docView.setVisible(True)
             docView.openFile(path)
+            docView.activateWindow()
             self.addDocView(docView)
         self.updateWindowsMenu()
 
@@ -422,7 +425,7 @@ class PWVMainWin(QMainWindow):
     def _menuFileOpenCB(self):
         dlgcap = "Open Vault..."
         dialog = QFileDialog(self, caption=dlgcap,
-                             directory="", filter="*.pwv")
+                             directory=self._lastOpenDirPath, filter="*.pwv")
         dialog.setOption(QFileDialog.Option.DontUseNativeDialog)
         dialog.setFilter(QtCore.QDir.Filter.Files)
         dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
@@ -432,6 +435,7 @@ class PWVMainWin(QMainWindow):
         if dialog.exec():
             fnames = dialog.selectedFiles()
             self.openVaultPath(fnames[0])
+            self._lastOpenDirPath = os.path.dirname(fnames[0])
 
     def _menuFileOpenRecentCB(self, path):
         if not os.path.exists(path):

@@ -485,8 +485,6 @@ class PWVDocView(QWidget):
         if status == "CANCEL":
             qev.ignore()
 
-### BEGIN EVENT HANDLERS
-
     def closeEvent(self, qev):
         """Handle stand-alone document window closure safely."""
         print(f"PWVDocView.closeEvent {qev}")

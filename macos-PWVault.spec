@@ -57,7 +57,7 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name='PWVault.app',
-    icon='assets/vault-icon.icns',
+    icon='assets/pwvault-app.icns',
     bundle_identifier='com.midoma.pyapps.pwvault',
     info_plist={
         'CFBundleURLTypes': [{
@@ -69,6 +69,7 @@ app = BUNDLE(
             'CFBundleTypeName': 'PWVaultFileType',
             'CFBundleTypeExtensions': ['pwv', ],
             'CFBundleTypeRole': "Viewer",
+            'CFBundleTypeIconFile': 'pwvault-doc.icns',
         }],
     }
 )
