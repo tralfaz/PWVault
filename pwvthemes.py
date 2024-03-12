@@ -344,7 +344,7 @@ def DarkPaletteWindows(wgt):
     pal.setColor(cg, QPalette.ColorRole.Link,            QColor(0xff3586ff))
     pal.setColor(cg, QPalette.ColorRole.LinkVisited,     QColor(0xffff00ff))
     pal.setColor(cg, QPalette.ColorRole.Mid,             QColor(0xff242424))
-    pal.setColor(cg, QPalette.ColorRole.NColorRoles,     QColor(0x3fffffff))
+#    pal.setColor(cg, QPalette.ColorRole.NColorRoles,     QColor(0x3fffffff))
     pal.setColor(cg, QPalette.ColorRole.NoRole,          QColor(0xff000000))
     pal.setColor(cg, QPalette.ColorRole.PlaceholderText, QColor(0x3fffffff))
     pal.setColor(cg, QPalette.ColorRole.Shadow,          QColor(0xff000000))
@@ -461,7 +461,7 @@ def LightPaletteWindows(wgt):
     pal.setColor(cg, QPalette.ColorRole.Link,            QColor(0xff0000ff))
     pal.setColor(cg, QPalette.ColorRole.LinkVisited,     QColor(0xffff00ff))
     pal.setColor(cg, QPalette.ColorRole.Mid,             QColor(0xffa0a0a0))
-    pal.setColor(cg, QPalette.ColorRole.NColorRoles,     QColor(0xff787878))
+#    pal.setColor(cg, QPalette.ColorRole.NColorRoles,     QColor(0xff787878))
     pal.setColor(cg, QPalette.ColorRole.NoRole,          QColor(0xff000000))
     pal.setColor(cg, QPalette.ColorRole.PlaceholderText, QColor(0x80000000))
     pal.setColor(cg, QPalette.ColorRole.Shadow,          QColor(0xff696969))
@@ -515,7 +515,6 @@ def LightPaletteWindows(wgt):
     pal.setColor(cg, QPalette.ColorRole.ToolTipText,     QColor(0xff000000))
     pal.setColor(cg, QPalette.ColorRole.Window,          QColor(0xfff0f0f0))
     pal.setColor(cg, QPalette.ColorRole.WindowText,      QColor(0xff000000))
-
     wgt.setPalette(pal)
 
              

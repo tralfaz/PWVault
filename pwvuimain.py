@@ -106,8 +106,6 @@ class PWVMainWin(QMainWindow):
         dialog.setNameFilter("PWVDoc (*.pwv *.pwvx)")
         fname, fset = dialog.getSaveFileName(self, caption=dlgcap)
         if fname:
-            print(f"FNAME: {fname}")
-            print(f"FSET: {fset}")
             actWin = QApplication.instance().findActive()
             if actWin:
                 actWin.docView().pwvDoc().saveDocAs(fname)
@@ -168,15 +166,9 @@ class PWVMainWin(QMainWindow):
         docEnts.append(entry)
         card = PWVCard(entry)
         vbar = self._docScrollArea.verticalScrollBar()
-        print("PRE ADD: ", self._formLayout.contentsRect())
-        print("PRE ADD W GEOM:", card.geometry())
-        print("PRE VBAR MAX:", vbar.maximum())
         saRect = self._formLayout.contentsRect()
         self._formLayout.addRow(card)
-        print("POST ADD: ", self._formLayout.contentsRect())
         cardGeom = card.geometry()
-        print("POST ADD W GEOM:", card.geometry())
-        print("POST VBAR MAX:", vbar.maximum())
 
     def _activeChangeCB(self):
         print("MainWin._activeChangeCB)")
@@ -525,10 +517,8 @@ class PWVMainWin(QMainWindow):
         else:
             colorTheme = self._viewTheme
 
-        print(f"PWVMainWin._themeChange: {colorTheme=}")
         SetColorTheme(app, colorTheme)
         for win in self._docWins:
-            print(f"PWVMainWin._themeChange: {win = }")
             SetColorTheme(win, colorTheme)
             win.docView().changeTheme(colorTheme)
         

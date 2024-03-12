@@ -1,4 +1,5 @@
 import os
+import sys
 
 from PyQt6           import QtCore
 from PyQt6.QtWidgets import QCompleter
@@ -368,6 +369,8 @@ class PWVDocView(QWidget):
         
         assetsPath = os.path.dirname(__file__)
         assetsPath = os.path.join(assetsPath, "assets") + os.path.sep
+        if sys.platform[0:3] == "win":
+            assetsPath = assetsPath.replace('\\', '/')
         if theme == "light":
             cssfmt = _CARD_STYLE_LIGHT
         else:
