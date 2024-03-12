@@ -75,6 +75,9 @@ class PWVMainWin(QMainWindow):
         """Return the document view associated with this top level window"""
         return self._docView
 
+    def docWindows(self):
+        return self._docWins
+
     def openVaultPath(self, path):
         actWin = QApplication.instance().findActive()
         if actWin is None and len(self._docWins) > 0:
@@ -335,6 +338,12 @@ class PWVMainWin(QMainWindow):
         self._themeDarkAct.setStatusTip("Dark color theme")
         self._themeDarkAct.triggered.connect(self._menuViewThemeDarkCB)
         self._themeMenu.addAction(self._themeDarkAct)
+        self._themeSystemAct = QAction("System", self)
+        self._themeSystemAct.setCheckable(True)
+        self._themeSystemAct.setChecked(theme == "System")
+        self._themeSystemAct.setStatusTip("Use system theme option")
+        self._themeSystemAct.triggered.connect(self._menuViewThemeSystemCB)
+        self._themeMenu.addAction(self._themeSystemAct)
         
         # Windows menu
         self._winMenu = self.menuBar().addMenu("Windows")
@@ -447,13 +456,22 @@ class PWVMainWin(QMainWindow):
     def _menuViewThemeDarkCB(self):
         PWVApp.instance().settings().setAppViewTheme("Dark")
         self._themeLightAct.setChecked(False)
+        self._themeSystemAct.setChecked(False)
         self._viewTheme = "Dark"
         self._themeChange()
         
     def _menuViewThemeLightCB(self):
         PWVApp.instance().settings().setAppViewTheme("Light")
         self._themeDarkAct.setChecked(False)
+        self._themeSystemAct.setChecked(False)
         self._viewTheme = "Light"
+        self._themeChange()
+
+    def _menuViewThemeSystemCB(self):
+        PWVApp.instance().settings().setAppViewTheme("System")
+        self._themeDarkAct.setChecked(False)
+        self._themeLightAct.setChecked(False)
+        self._viewTheme = "System"
         self._themeChange()
 
     def _menuZoomMinusCB(self):
@@ -491,13 +509,28 @@ class PWVMainWin(QMainWindow):
         else:
             return "Cancel"
 
-    def _themeChange(self):
+    def _themeChange(self, systemTheme=None):
         app = PWVApp.instance()
-        SetColorTheme(app, self._viewTheme)
+        if systemTheme:
+            colorTheme = systemTheme
+        elif self._viewTheme == "System":
+            sh = app.styleHints()
+            cs = sh.colorScheme()
+            if cs == QtCore.Qt.ColorScheme.Dark:
+                colorTheme = "Dark"
+            elif cs == QtCore.Qt.ColorScheme.Light:
+                colorTheme = "Light"
+            else:
+                return
+        else:
+            colorTheme = self._viewTheme
+
+        print(f"PWVMainWin._themeChange: {colorTheme=}")
+        SetColorTheme(app, colorTheme)
         for win in self._docWins:
-            print(f"_themeChange: {win = }")
-            SetColorTheme(win, self._viewTheme)
-            win.docView().changeTheme(self._viewTheme)
+            print(f"PWVMainWin._themeChange: {win = }")
+            SetColorTheme(win, colorTheme)
+            win.docView().changeTheme(colorTheme)
         
     def _winMenuCB(self, docView):
 #        print(f"_winMenuCB {docView}")

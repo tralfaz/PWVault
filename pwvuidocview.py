@@ -238,11 +238,6 @@ class PWVDocView(QWidget):
             self._lastCardSelected = cardClicked
         
     def selectExtend(self, cardClicked):
-        if self._lastCardSelected:
-            print(f"LAST CLICKED: {self._lastCardSelected.entryID()}")
-        else:
-            print("LAST CLICKED: NONE")
-
         inExtend = False
         for card in self._cards:
 #            print(f"CARD: {card.entryID()}")
@@ -278,7 +273,6 @@ class PWVDocView(QWidget):
         fname = self._pwvDoc.fileName()
         if not fname:
             fname = "<New Vault>"
-#        print(f"updateTitle: {self._pwvDoc.modified()}")
         if self._pwvDoc.modified():
             fname = f"* {fname} *"
         encoded = " (ENCODED)" if self._pwvDoc.encoded() else ""
@@ -417,7 +411,6 @@ class PWVDocView(QWidget):
             nents = len(self._pwvDoc.entries())
         else:
             nents = 0
-            print("_searchLE.setVisible(False)")
             self._searchLE.setVisible(False)
             card = PWVEncodedCard()
 #            self._cards.append(card)
@@ -432,7 +425,7 @@ class PWVDocView(QWidget):
         scroll.setWidgetResizable(True)
         scroll.verticalScrollBar().rangeChanged.connect(self._docScrollRangeCB)
         scroll.setWidget(cardsForm)
-        theme = PWVApp.instance().settings().appViewTheme()
+        theme = PWVApp.instance().affectiveColorTheme()
         cardsForm.setStyleSheet(self._cardStyle(theme))
 
         self._addEntryBTN = QPushButton("+")
@@ -452,7 +445,6 @@ class PWVDocView(QWidget):
             vbar.setValue(vbar.maximum())
             
     def _getCardValues(self):
-        print(f"_getCardValues RC: {len(self._cards)}")
         for card in  self._cards:
             card.entryUpdate()
 
@@ -481,17 +473,14 @@ class PWVDocView(QWidget):
 
     def closeEvent(self, qev):
         status = self._appMenuQuitCB()
-        print(f"STATUS: {status}")
         if status == "CANCEL":
             qev.ignore()
 
     def closeEvent(self, qev):
         """Handle stand-alone document window closure safely."""
-        print(f"PWVDocView.closeEvent {qev}")
         if self.pwvDoc().modified():
             app = PWVApp.instance()
             status = app.mainWin()._askToSaveDoc(self)
-            print(f"DocView.closeEvent: status={status}")
             if status == "CANCEL":
                 qev.ignore()
         # Save app settings
@@ -512,20 +501,23 @@ class PWVDocView(QWidget):
 
 
 _CARD_STYLE_DARK = """
-          PWVCard[selected="false"] {{
-            background-color: black;
-            border: 5px solid gray;
-            border-radius: 0px;
-          }}
-          PWVCard[selected="true"] {{
-            background-color: rgba(100,100,100, 0.4);
-            border: 5px solid yellow;
-            border-radius: 10px;
-          }}
-          PWVCard QGroupBox {{
-            padding: 3 0px;
-          }}
-          PWVCard QGroupBox::title {{
+         CardsScrollArea {{
+           background-color: 0xff171717;
+         }}
+         PWVCard[selected="false"] {{
+           background-color: black;
+           border: 5px solid gray;
+           border-radius: 0px;
+         }}
+         PWVCard[selected="true"] {{
+           background-color: rgba(100,100,100, 0.4);
+           border: 5px solid yellow;
+           border-radius: 10px;
+         }}
+         PWVCard QGroupBox {{
+           padding: 3 0px;
+         }}
+         PWVCard QGroupBox::title {{
            subcontrol-position: top center;
            padding-bottom: 3px;
          }}
@@ -547,6 +539,9 @@ _CARD_STYLE_DARK = """
          """
 
 _CARD_STYLE_LIGHT = """
+         CardsScrollArea {{
+           background-color: #e3d8c5;
+         }}
          PWVCard[selected="false"] {{
            background-color: #e3d8c5;
            border: 5px solid gray;

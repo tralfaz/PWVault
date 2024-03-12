@@ -87,10 +87,13 @@ class PWVUiSettings(PWVSettings):
         return self._cache.get(self.RECENT_OPENS, [])
     
     def setAppViewTheme(self, theme):
-        if theme.lower() == "light":
+        theme = theme.lower()
+        if theme == "light":
             self.setValue(self.APP_VIEW_THEME, "Light")
-        elif theme.lower() == "dark":
+        elif theme == "dark":
             self.setValue(self.APP_VIEW_THEME, "Dark")
+        elif theme == "system":
+            self.setValue(self.APP_VIEW_THEME, "System")
 
     def setRecentOpens(self, recentOpens):
         self.setValue(self.RECENT_OPENS, recentOpens)

@@ -3,6 +3,7 @@ import logging
 import sys
 
 from PyQt6 import QtGui
+from PyQt6.QtCore    import Qt
 from PyQt6.QtCore    import QEvent
 from PyQt6.QtWidgets import QApplication
 
@@ -21,6 +22,23 @@ class PWVApp(QApplication):
         self._loadSettings()
         self._loadAssets()
         self._setAppWideStyles()
+
+    def affectiveColorTheme(self):
+        themeChoice = self.settings().appViewTheme()
+        if themeChoice == "System":
+            sh = self.styleHints()
+            cs = sh.colorScheme()
+            if cs == Qt.ColorScheme.Dark:
+                theme = "Dark"
+            elif cs == Qt.ColorScheme.Light:
+                theme = "Light"
+            else:
+                theme = "Dark"
+        elif themeChoice == "Light":
+            theme = "Light"
+        else:
+            theme = "Dark"
+        return theme
 
     def asset(self, name):
         return self._assets.get(name)
@@ -129,6 +147,11 @@ class PWVApp(QApplication):
 #            }
 #        """)
 
+    def _themeChangedCB(self, theme):
+        themeChoice = self.affectiveColorTheme()
+        if self.mainWin():
+            self.mainWin()._themeChange(themeChoice)
+                        
 ### BEGIN EVENT HANDLERS
 
     def event(self, qev):
@@ -168,6 +191,10 @@ if __name__ == "__main__":
     
     app = PWVApp()
 
+    sh = app.styleHints()
+    sh.colorSchemeChanged.connect(app._themeChangedCB)
+    cs = sh.colorScheme()
+    
     mainWin = PWVMainWin()
     app.setMainWin(mainWin)
 

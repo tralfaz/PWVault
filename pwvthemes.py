@@ -34,8 +34,10 @@ def SetColorTheme(wgt, theme):
     if sys.platform == "darwin":
         if theme == "dark":
             DarkPaletteApple(wgt)
+            print("DarkPaletteApple")
         elif theme == "light":
             LightPaletteApple(wgt)
+            print("LightPaletteApple")
     elif sys.platform[0:3] == "win":
         if theme == "dark":
             DarkPaletteWindows(wgt)
@@ -109,7 +111,7 @@ def DarkPaletteApple(wgt):
     pal.setColor(cg, QPalette.ColorRole.Link,            QColor(0xff3586ff))
     pal.setColor(cg, QPalette.ColorRole.LinkVisited,     QColor(0xffff00ff))
     pal.setColor(cg, QPalette.ColorRole.Mid,             QColor(0xff242424))
-    pal.setColor(cg, QPalette.ColorRole.NColorRoles,     QColor(0x3fffffff))
+#    pal.setColor(cg, QPalette.ColorRole.NColorRoles,     QColor(0x3fffffff))
     pal.setColor(cg, QPalette.ColorRole.NoRole,          QColor(0xff000000))
     pal.setColor(cg, QPalette.ColorRole.PlaceholderText, QColor(0x3fffffff))
     pal.setColor(cg, QPalette.ColorRole.Shadow,          QColor(0xff000000))
@@ -225,7 +227,7 @@ def LightPaletteApple(wgt):
     pal.setColor(cg, QPalette.ColorRole.Link,            QColor(0xff094fd1))
     pal.setColor(cg, QPalette.ColorRole.LinkVisited,     QColor(0xffff00ff))
     pal.setColor(cg, QPalette.ColorRole.Mid,             QColor(0xffa9a9a9))
-    pal.setColor(cg, QPalette.ColorRole.NColorRoles,     QColor(0x3f000000))
+#    pal.setColor(cg, QPalette.ColorRole.NColorRoles,     QColor(0x3f000000))
     pal.setColor(cg, QPalette.ColorRole.NoRole,          QColor(0xff000000))
     pal.setColor(cg, QPalette.ColorRole.PlaceholderText, QColor(0x3f000000))
     pal.setColor(cg, QPalette.ColorRole.Shadow,          QColor(0xff000000))
@@ -279,7 +281,7 @@ def LightPaletteApple(wgt):
     pal.setColor(cg, QPalette.ColorRole.ToolTipText,     QColor(0xff000000))
     pal.setColor(cg, QPalette.ColorRole.Window,          QColor(0xffececec))
     pal.setColor(cg, QPalette.ColorRole.WindowText,      QColor(0xd8000000))
-
+    
 
 def DarkPaletteWindows(wgt):
     pal = wgt.palette()
