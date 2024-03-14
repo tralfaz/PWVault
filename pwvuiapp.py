@@ -6,6 +6,7 @@ from PyQt6 import QtGui
 from PyQt6.QtCore    import Qt
 from PyQt6.QtCore    import QEvent
 from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QStyleFactory
 
 from pwvsettings import PWVUiSettings
 
@@ -21,6 +22,10 @@ class PWVApp(QApplication):
 
         self._loadSettings()
         self._loadAssets()
+
+        if sys.platform[0:3] == "win":
+            self.setStyle(QStyleFactory.create("Windows"))
+            
         self._setAppWideStyles()
 
     def affectiveColorTheme(self):
