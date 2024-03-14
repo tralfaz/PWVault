@@ -47,11 +47,11 @@ class PWVCardField(QWidget):
         self._valUrl     = url
         
 #        self._idLBL  = QLabel(f'<big><b><font color="white">{id}:</font></b></big>')
-        self._idLBL  = QLabel(f'<big><b>{id}:</b></big>')
+        self._idLBL  = QLabel(f'<big><b>{id}:</b></big>', self)
         if pswd:
             self._valLBL = PWVPswdLabel(val)
         else: 
-            self._valLBL = QLabel(val)
+            self._valLBL = QLabel(val, self)
         if fmt and not url:
             self._valLBL.setText(fmt.format(val))
         elif url:
@@ -61,16 +61,16 @@ class PWVCardField(QWidget):
             self._valLBL.setMinimumWidth(400)
             self._valLBL.setMaximumWidth(600)
         if pswd:
-            self._valLE  = PWVPswdLineEdit()
+            self._valLE  = PWVPswdLineEdit(parent=self)
         else:
-            self._valLE  = QLineEdit()
+            self._valLE  = QLineEdit(self)
         self._valLE.setVisible(False)
         self._valLE.editingFinished.connect(self._editDoneCB)
-        self._copyBTN = PWVCFCopyButton()
+        self._copyBTN = PWVCFCopyButton(self)
         self._copyBTN.clicked.connect(self._copyCB)
         self._copyBTN.setVisible('C' in ctrls)
             
-        self._editBTN = PWVCFEditButton()
+        self._editBTN = PWVCFEditButton(self)
         self._editBTN.clicked.connect(self._editCB)
         self._editBTN.setVisible('E' in ctrls)
 
@@ -167,8 +167,8 @@ class PWVCardExpandButton(QPushButton):
 
 class PWVCard(QFrame):
 
-    def __init__(self, entry):
-        super().__init__()
+    def __init__(self, entry, parent=None):
+        super().__init__(parent)
 
         self._entry = entry
 
@@ -185,25 +185,28 @@ class PWVCard(QFrame):
         vbox.setSpacing(0)
 
         eid = entry.get(PWVKey.ID,"<I>Missing: ID</I>")
-        self._idCF = PWVCardField(id="ID", val=eid, ctrls="CE",
+        self._idCF = PWVCardField(parent=self, id="ID", val=eid, ctrls="CE",
                                   fmt='<b>{0}</b>')
 
         self._idCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.ID)
         vbox.addWidget(self._idCF)
         
         eurl = entry.get(PWVKey.URL, "<I>Missing: URL</I>")
-        self._urlCF = PWVCardField(id="URL", val=eurl, url=True, ctrls="CE")
+        self._urlCF = PWVCardField(parent=self, id="URL", val=eurl,
+                                   url=True, ctrls="CE")
         self._urlCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.URL)
         vbox.addWidget(self._urlCF)
         
         euser = entry.get(PWVKey.USER, "<I>Missing: USER</I>")
         upfmt = '<b>{0}</b>'
-        self._userCF = PWVCardField(id="USER", val=euser, fmt=upfmt, ctrls="CE")
+        self._userCF = PWVCardField(parent=self, id="USER", val=euser,
+                                    fmt=upfmt, ctrls="CE")
         self._userCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.USER)
         vbox.addWidget(self._userCF)
         
         epswd = entry.get(PWVKey.PSWD, "<I>Missing: PSWD</I>")
-        self._pswdCF = PWVCardField(id="PSWD", val=epswd, ctrls="CE", pswd=True)
+        self._pswdCF = PWVCardField(parent=self, id="PSWD", val=epswd,
+                                    ctrls="CE", pswd=True)
         self._pswdCF.addEditDoneCallback(self._cfEditDoneCB, entry, PWVKey.PSWD)
         vbox.addWidget(self._pswdCF)
 

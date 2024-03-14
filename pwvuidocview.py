@@ -67,7 +67,7 @@ class PWVDocView(QWidget):
         nents = len(self._pwvDoc.entries())
         entry = self._pwvDoc.newEntry()
         self._pwvDoc.appendEntries([entry])
-        card = PWVCard(entry)
+        card = PWVCard(entry, self._cardsForm)
         card.zoom(self.cardZoom())
         self._cards.append(card)
         vbar = self._docScrollArea.verticalScrollBar()
@@ -336,7 +336,7 @@ class PWVDocView(QWidget):
                 progDlg = None 
 
             for edx,entry in enumerate(self._pwvDoc.entries()):
-                card = PWVCard(entry)
+                card = PWVCard(entry, self._cardsForm)
                 self._cards.append(card)
                 self._formLayout.addRow(card)
                 if progDlg:
@@ -407,7 +407,7 @@ class PWVDocView(QWidget):
         if not self._pwvDoc.encoded():
             self._searchLE.setVisible(True)
             for entry in self._pwvDoc.entries():
-                card = PWVCard(entry)
+                card = PWVCard(entry, self._cardsForm)
                 self._cards.append(card)
                 self._formLayout.addRow(card)
 
@@ -466,7 +466,7 @@ class PWVDocView(QWidget):
         rowEntry = self.pwvDoc().entries()[fromIdx]
         self._formLayout.removeRow(fromIdx)
         self._cards.pop(fromIdx)
-        newCard = PWVCard(rowEntry)
+        newCard = PWVCard(rowEntry, self._cardsForm)
         self._formLayout.insertRow(toIdx, newCard)
         self._cards.insert(toIdx, newCard)
         newCard.setSelected(True)
