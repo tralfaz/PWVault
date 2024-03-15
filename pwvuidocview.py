@@ -179,7 +179,8 @@ class PWVDocView(QWidget):
         
     def deleteSelection(self): 
         modified = False
-        for cdx, card in enumerate(self._cards):
+        for cdx in range(len(self._cards)-1, -1, -1):
+            card = self._cards[cdx]
             if card.selected():
                 self._cards.pop(cdx)
                 entry = self.pwvDoc().popEntry(cdx)
@@ -490,14 +491,13 @@ class PWVDocView(QWidget):
         stgmgr = PWVApp.instance().settings()
         stgmgr.saveAll()
         
-
-#    def keyPressEvent(self, qev):
-#        #print(f"PWVDocView.keyPressEvent: KEY:{qev.key()} TEXT:{repr(qev.text())}")
-#        #print(f"NVK: {qev.nativeVirtualKey()}")
-##        if qev.key() == QtCore.Qt.Key.Key_Delete:
-##            print("DELETE")
-#        if qev.key() == QtCore.Qt.Key.Key_Backspace:
-#            self.deleteSelection()
+    def keyPressEvent(self, qev):
+#        print(f"PWVDocView.keyPressEvent: KEY:{qev.key()} TEXT:{repr(qev.text())}")
+#        print(f"NVK: {qev.nativeVirtualKey()}")
+        if qev.key() == QtCore.Qt.Key.Key_Delete:
+            self.deleteSelection()
+        elif qev.key() == QtCore.Qt.Key.Key_Backspace:
+            self.deleteSelection()
 
 ### END EVENT HANDLERS
         
