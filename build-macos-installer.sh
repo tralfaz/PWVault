@@ -21,7 +21,7 @@ fi
 
 "$CREATEDMG" \
   --volname "PWVault" \
-  --volicon "assets/vault-icon.icns" \
+  --volicon "assets/pwvault-app.icns" \
   --window-pos 200 120 \
   --window-size 600 300 \
   --icon-size 100 \
@@ -29,4 +29,4 @@ fi
   --hide-extension "PWVault.app" \
   --app-drop-link 425 120 \
   "dist/PWVault.dmg" \
-  "dist/dmg/"
+  "dist/PWVault.app"
