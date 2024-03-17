@@ -23,6 +23,7 @@ fi
   --volname "PWVault" \
   --volicon "assets/pwvault-app.icns" \
   --window-pos 200 120 \
+  --background "assets/padlock-background.png" \
   --window-size 600 300 \
   --icon-size 100 \
   --icon "PWVault.app" 175 120 \
