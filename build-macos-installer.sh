@@ -3,7 +3,13 @@
 # CreateDMG: https://github.com/create-dmg/create-dmg
 #  brew install create-dmg
 #
-CREATEDMG=/opt/homebrew/bin/create-dmg
+if [ -e /opt/homebrew/bin/create-dmg ]; then
+    CREATEDMG=/opt/homebrew/bin/create-dmg
+elif [ -e /usr/local/bin/create-dmg ]; then
+    CREATEDMG=/usr/local/bin/create-dmg
+else
+    CREATEDMG=create-dmg
+fi
 
 # Create a folder to prepare our DMG in (if it doesn't already exist).
 if [ -e dist/dmg ]; then
