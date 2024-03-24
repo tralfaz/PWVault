@@ -41,8 +41,8 @@ class CardsScrollArea(QScrollArea):
 
 class PWVDocView(QWidget):
 
-    def __init__(self, pwvDoc=None):
-        super().__init__(None)
+    def __init__(self, parent=None, pwvDoc=None):
+        super().__init__(parent)
 
         self.setGeometry(200, 200, 800, 600)
         
@@ -388,7 +388,7 @@ class PWVDocView(QWidget):
     def _buildDocWindow(self):
         self._formLayout = QFormLayout()
         self._formLayout.setContentsMargins(0, 0, 0, 0)
-        self._searchLE = QLineEdit()
+        self._searchLE = QLineEdit(self)
         self._searchLE.setPlaceholderText("Search Entries, Start with ~ for complete search")
         self._searchLE.textChanged.connect(self._searchCB)
 
@@ -420,19 +420,18 @@ class PWVDocView(QWidget):
 #            self._cards.append(card)
             self._formLayout.addRow(card)
             
-        self._entriesGRP = QGroupBox(f"Entries: {nents}")
+        self._entriesGRP = QGroupBox(f"Entries: {nents}", parent=self)
  
-        self._cardsForm = cardsForm = QWidget()
+        self._docScrollArea = scroll = CardsScrollArea(self)
+        self._cardsForm = cardsForm = QWidget(scroll)
         cardsForm.setLayout(self._formLayout)
-        
-        self._docScrollArea = scroll = CardsScrollArea()
         scroll.setWidgetResizable(True)
         scroll.verticalScrollBar().rangeChanged.connect(self._docScrollRangeCB)
         scroll.setWidget(cardsForm)
         theme = PWVApp.instance().affectiveColorTheme()
         cardsForm.setStyleSheet(self._cardStyle(theme))
 
-        self._addEntryBTN = QPushButton("+")
+        self._addEntryBTN = QPushButton("+", parent=self)
         self._addEntryBTN.clicked.connect(self.addEntry)
         
         vbox = QVBoxLayout()

@@ -51,7 +51,7 @@ class PWVMainWin(QMainWindow):
         self.setWindowTitle("PWVault")
         self.setGeometry(200, 500, 800, 600)
 
-        self._docView = PWVDocView()
+        self._docView = PWVDocView(self)
         self.setCentralWidget(self._docView)
 
         self._buildMenus()
