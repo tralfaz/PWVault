@@ -43,6 +43,10 @@ outFile "${APPSHORTNAME}-install.exe"
 #...Not certain about this one
 !include LogicLib.nsh
 
+# App file association
+RequestExecutionLevel admin
+!include build-win-associate.nsi
+
 #Defines installation pages - these are known to NSIS
 #Shows the license
 Page license
