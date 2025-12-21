@@ -336,7 +336,17 @@ class PWVMainWin(QMainWindow):
         self._themeSystemAct.setStatusTip("Use system theme option")
         self._themeSystemAct.triggered.connect(self._menuViewThemeSystemCB)
         self._themeMenu.addAction(self._themeSystemAct)
-        
+        self._revealFirstAct = QAction("Reveal First Selected", self)
+        self._revealFirstAct.setStatusTip("Scroll To First Selected Entry")
+        self._revealFirstAct.setShortcut(QKeySequence("Ctrl+["))
+        self._revealFirstAct.triggered.connect(self._menuViewRevealFirstCB)
+        self._viewMenu.addAction(self._revealFirstAct)
+        self._revealLastAct = QAction("Reveal Last Selected", self)
+        self._revealLastAct.setStatusTip("Scroll To Last Selected Entry")
+        self._revealLastAct.setShortcut(QKeySequence("Ctrl+]"))
+        self._revealLastAct.triggered.connect(self._menuViewRevealLastCB)
+        self._viewMenu.addAction(self._revealLastAct)
+
         # Windows menu
         self._winMenu = self.menuBar().addMenu("Windows")
 
@@ -445,6 +455,22 @@ class PWVMainWin(QMainWindow):
             return
         self.openVaultPath(path)
         
+    def _menuViewRevealFirstCB(self):
+        actWin = PWVApp.instance().findActive()
+        if actWin:
+            print(f"{actWin=}")
+            docWin = actWin.docView()
+            print(f"{docWin=}")
+            if docWin:
+                docWin.revealFirstSelected()
+
+    def _menuViewRevealLastCB(self):
+        actWin = PWVApp.instance().findActive()
+        if actWin:
+            docWin = actWin.docView()
+            if docWin:
+                docWin.revealLastSelected()
+
     def _menuViewThemeDarkCB(self):
         PWVApp.instance().settings().setAppViewTheme("Dark")
         self._themeLightAct.setChecked(False)

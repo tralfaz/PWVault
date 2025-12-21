@@ -226,14 +226,27 @@ class PWVDocView(QWidget):
         return self._pwvDoc
     
     def queryPswd(self, title):
-#        text, ok = QInputDialog.getText(self, title,
-#                                        "Password:",
-#                                        QLineEdit.EchoMode.Password)
         text, ok = PWVPswdDialog.getText(self, title, "Password:")
         if ok and text:
             return text
         return None
     
+    def revealFirstSelected(self):
+        for card in self._cards:
+            if card.selected():
+                self._docScrollArea.ensureWidgetVisible(card, 0, 0)
+#                    vsb = self._docScrollArea.verticalScrollBar()
+#                    if vsb:
+#                        vsb.setValue(card.y())
+#                        vsb.setSliderPosition(vsb.sliderPosition()+cardH)
+                break
+
+    def revealLastSelected(self):
+        for card in reversed(self._cards):
+            if card.selected():
+                self._docScrollArea.ensureWidgetVisible(card, 0, 0)
+                break
+                
     def selectAdd(self, cardClicked):
         cardClicked.setSelected(not cardClicked.selected())
         if cardClicked.selected():
@@ -389,7 +402,7 @@ class PWVDocView(QWidget):
         self._formLayout = QFormLayout()
         self._formLayout.setContentsMargins(0, 0, 0, 0)
         self._searchLE = QLineEdit(self)
-        self._searchLE.setPlaceholderText("Search Entries, Start with ~ for complete search")
+        self._searchLE.setPlaceholderText("Search Entries, Start with % for complete search")
         self._searchLE.textChanged.connect(self._searchCB)
 
         actPos = QLineEdit.ActionPosition.TrailingPosition
@@ -461,6 +474,11 @@ class PWVDocView(QWidget):
             text = text[1:]
         for card in self._cards:
             card.setVisible(card.searchMatch(text, fullSearch))
+        if text == "":
+            self._revealSearchTimer = QtCore.QTimer()
+            self._revealSearchTimer.setSingleShot(True)
+            self._revealSearchTimer.timeout.connect(self.revealFirstSelected)
+            self._revealSearchTimer.start(200)
 
     def _shiftCard(self, fromIdx, toIdx):
         rowEntry = self.pwvDoc().entries()[fromIdx]
